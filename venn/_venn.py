@@ -1,5 +1,5 @@
 from itertools import chain
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import subplots, annotate
 import matplotlib.patches as patches
 from matplotlib import colors
 import math
@@ -55,7 +55,7 @@ def draw_text(fig, ax, x, y, text, color=[0, 0, 0, 1], fontsize=14):
         color=color)
 
 def draw_annotate(fig, ax, x, y, textx, texty, text, color=[0, 0, 0, 1], arrowcolor=[0, 0, 0, 0.3]):
-    plt.annotate(
+    annotate(
         text,
         xy=(x, y),
         xytext=(textx, texty),
@@ -103,7 +103,7 @@ def venn2(labels, names=['A', 'B'], **options):
     dpi = options.get('dpi', 96)
     fontsize = options.get('fontsize', 14)
     # figure:
-    fig = plt.figure(0, figsize=figsize, dpi=dpi)
+    fig = plot.figure(0, figsize=figsize, dpi=dpi)
     ax = fig.add_subplot(111, aspect='equal')
     ax.set_axis_off()
     ax.set_ylim(bottom=0.0, top=0.7)
@@ -123,30 +123,29 @@ def venn2(labels, names=['A', 'B'], **options):
 
 def venn3(labels, names=['A', 'B', 'C'], cmap=None, shift=0, alpha=0.7, figsize=(6, 6), dpi=96, fontsize=13):
     colors = from_colormap(cmap, n_colors=3, shift=shift, alpha=alpha)
-    # figure:
-    fig = plt.figure(figsize=figsize, dpi=dpi)
-    ax = fig.add_subplot(111, aspect='equal')
-    ax.set_axis_off()
-    ax.set_ylim(bottom=0.0, top=1.0)
-    ax.set_xlim(left=0.0, right=1.0)
+    figure, ax = subplots(
+        nrows=1, ncols=1, figsize=figsize, dpi=dpi, subplot_kw={
+            "aspect": "equal", "frame_on": False, "xticks": [], "yticks": []
+        }
+    )
     # body:
-    draw_ellipse(fig, ax, 0.333, 0.633, 0.5, 0.5, 0.0, colors[0])
-    draw_ellipse(fig, ax, 0.666, 0.633, 0.5, 0.5, 0.0, colors[1])
-    draw_ellipse(fig, ax, 0.500, 0.310, 0.5, 0.5, 0.0, colors[2])
-    draw_text(fig, ax, 0.50, 0.27, labels.get('001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.73, 0.65, labels.get('010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.61, 0.46, labels.get('011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.27, 0.65, labels.get('100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.39, 0.46, labels.get('101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.50, 0.65, labels.get('110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.50, 0.51, labels.get('111', ''), fontsize=fontsize)
+    draw_ellipse(figure, ax, 0.333, 0.633, 0.5, 0.5, 0.0, colors[0])
+    draw_ellipse(figure, ax, 0.666, 0.633, 0.5, 0.5, 0.0, colors[1])
+    draw_ellipse(figure, ax, 0.500, 0.310, 0.5, 0.5, 0.0, colors[2])
+    draw_text(figure, ax, 0.50, 0.27, labels.get('001', ''), fontsize=fontsize)
+    draw_text(figure, ax, 0.73, 0.65, labels.get('010', ''), fontsize=fontsize)
+    draw_text(figure, ax, 0.61, 0.46, labels.get('011', ''), fontsize=fontsize)
+    draw_text(figure, ax, 0.27, 0.65, labels.get('100', ''), fontsize=fontsize)
+    draw_text(figure, ax, 0.39, 0.46, labels.get('101', ''), fontsize=fontsize)
+    draw_text(figure, ax, 0.50, 0.65, labels.get('110', ''), fontsize=fontsize)
+    draw_text(figure, ax, 0.50, 0.51, labels.get('111', ''), fontsize=fontsize)
     # legend:
-    draw_text(fig, ax, 0.15, 0.87, names[0], colors[0], fontsize=fontsize)
-    draw_text(fig, ax, 0.85, 0.87, names[1], colors[1], fontsize=fontsize)
-    draw_text(fig, ax, 0.50, 0.02, names[2], colors[2], fontsize=fontsize)
+    draw_text(figure, ax, 0.15, 0.87, names[0], colors[0], fontsize=fontsize)
+    draw_text(figure, ax, 0.85, 0.87, names[1], colors[1], fontsize=fontsize)
+    draw_text(figure, ax, 0.50, 0.02, names[2], colors[2], fontsize=fontsize)
     leg = ax.legend(names, loc='best', fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    return fig, ax
+    return figure, ax
 
 def venn4(labels, names=['A', 'B', 'C', 'D'], **options):
     colors = options.get('colors', [default_colors[i] for i in range(4)])
@@ -154,7 +153,7 @@ def venn4(labels, names=['A', 'B', 'C', 'D'], **options):
     dpi = options.get('dpi', 96)
     fontsize = options.get('fontsize', 14)
     # figure:
-    fig = plt.figure(0, figsize=figsize, dpi=dpi)
+    fig = plot.figure(0, figsize=figsize, dpi=dpi)
     ax = fig.add_subplot(111, aspect='equal')
     ax.set_axis_off()
     ax.set_ylim(bottom=0.0, top=1.0)
@@ -194,7 +193,7 @@ def venn5(labels, names=['A', 'B', 'C', 'D', 'E'], **options):
     dpi = options.get('dpi', 96)
     fontsize = options.get('fontsize', 14)
     # figure:
-    fig = plt.figure(0, figsize=figsize, dpi=dpi)
+    fig = plot.figure(0, figsize=figsize, dpi=dpi)
     ax = fig.add_subplot(111, aspect='equal')
     ax.set_axis_off()
     ax.set_ylim(bottom=0.0, top=1.0)
@@ -252,7 +251,7 @@ def venn6(labels, names=['A', 'B', 'C', 'D', 'E'], **options):
     dpi = options.get('dpi', 96)
     fontsize = options.get('fontsize', 14)
     # figure:
-    fig = plt.figure(0, figsize=figsize, dpi=dpi)
+    fig = plot.figure(0, figsize=figsize, dpi=dpi)
     ax = fig.add_subplot(111, aspect='equal')
     ax.set_axis_off()
     ax.set_ylim(bottom=0.230, top=0.845)
