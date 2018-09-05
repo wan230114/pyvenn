@@ -123,24 +123,43 @@ def venn2(labels, names=['A', 'B'], **options):
     leg.get_frame().set_alpha(0.5)
     return fig, ax
 
-def venn3(labels, names=['A', 'B', 'C'], cmap=None, shift=0, alpha=0.7, figsize=(6, 6), dpi=96, fontsize=13):
-    colors = from_colormap(cmap, n_colors=3, shift=shift, alpha=alpha)
+ELLIPSE_COORDS = {
+    3: [[0.333, 0.633], [0.666, 0.633], [0.500, 0.310]]
+}
+ELLIPSE_DIMS = {
+    3: [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]
+}
+ELLIPSE_ANGLES = {
+    3: [0.0, 0.0, 0.0]
+}
+SUBSET_COORDS = {
+    3: {
+        "001": (0.50, 0.27), "010": (0.73, 0.65), "011": (0.61, 0.46),
+        "100": (0.27, 0.65), "101": (0.39, 0.46), "110": (0.50, 0.65),
+        "111": (0.50, 0.51)
+    }
+}
+
+def venn(labels, names=None, cmap=None, shift=0, alpha=0.7, figsize=(6, 6), dpi=96, fontsize=13):
+    n_venns = len(set(labels.values()))
+    if names is None:
+        names = list("ABCDEF")[:n_venns]
+    elif len(names) != n_venns:
+        raise ValueError("Lengths of labels and names do not match")
+    colors = from_colormap(cmap, n_colors=n_venns, shift=shift, alpha=alpha)
     figure, ax = subplots(
         nrows=1, ncols=1, figsize=figsize, dpi=dpi, subplot_kw={
             "aspect": "equal", "frame_on": False, "xticks": [], "yticks": []
         }
     )
-    # body:
-    draw_ellipse(figure, ax, 0.333, 0.633, 0.5, 0.5, 0.0, colors[0])
-    draw_ellipse(figure, ax, 0.666, 0.633, 0.5, 0.5, 0.0, colors[1])
-    draw_ellipse(figure, ax, 0.500, 0.310, 0.5, 0.5, 0.0, colors[2])
-    draw_text(figure, ax, 0.50, 0.27, labels.get('001', ''), fontsize=fontsize)
-    draw_text(figure, ax, 0.73, 0.65, labels.get('010', ''), fontsize=fontsize)
-    draw_text(figure, ax, 0.61, 0.46, labels.get('011', ''), fontsize=fontsize)
-    draw_text(figure, ax, 0.27, 0.65, labels.get('100', ''), fontsize=fontsize)
-    draw_text(figure, ax, 0.39, 0.46, labels.get('101', ''), fontsize=fontsize)
-    draw_text(figure, ax, 0.50, 0.65, labels.get('110', ''), fontsize=fontsize)
-    draw_text(figure, ax, 0.50, 0.51, labels.get('111', ''), fontsize=fontsize)
+    ellipse_params = zip(
+        ELLIPSE_COORDS[n_venns], ELLIPSE_DIMS[n_venns],
+        ELLIPSE_ANGLES[n_venns], colors
+    )
+    for coords, dims, angle, color in ellipse_params:
+        draw_ellipse(figure, ax, *coords, *dims, angle, color)
+    for subset, (x, y) in SUBSET_COORDS[n_venns].items():
+        draw_text(figure, ax, x, y, labels.get(subset, ""), fontsize=fontsize)
     # legend:
     draw_text(figure, ax, 0.15, 0.87, names[0], colors[0], fontsize=fontsize)
     draw_text(figure, ax, 0.85, 0.87, names[1], colors[1], fontsize=fontsize)
