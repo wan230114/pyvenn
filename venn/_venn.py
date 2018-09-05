@@ -160,10 +160,6 @@ def venn(labels, names=None, cmap=None, shift=0, alpha=0.7, figsize=(6, 6), dpi=
         draw_ellipse(figure, ax, *coords, *dims, angle, color)
     for subset, (x, y) in SUBSET_COORDS[n_venns].items():
         draw_text(figure, ax, x, y, labels.get(subset, ""), fontsize=fontsize)
-    # legend:
-    draw_text(figure, ax, 0.15, 0.87, names[0], colors[0], fontsize=fontsize)
-    draw_text(figure, ax, 0.85, 0.87, names[1], colors[1], fontsize=fontsize)
-    draw_text(figure, ax, 0.50, 0.02, names[2], colors[2], fontsize=fontsize)
     leg = ax.legend(names, loc='best', fancybox=True)
     leg.get_frame().set_alpha(0.5)
     return figure, ax
