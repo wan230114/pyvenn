@@ -1,7 +1,7 @@
 from itertools import chain
 from matplotlib.pyplot import subplots, annotate
 import matplotlib.patches as patches
-from matplotlib import colors
+from matplotlib.colors import to_rgba
 import math
 
 DEFAULT_RGB_VALS = [
@@ -10,7 +10,7 @@ DEFAULT_RGB_VALS = [
 ]
 
 def from_colormap(cmap, n_colors, shift=0, alpha=0.7):
-    """Generate colors from matplotlib colormap; pass cmap=None to fall back to default colors"""
+    """Generate colors from matplotlib colormap; pass list to use exact colors or cmap=None to fall back to default"""
     if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
         raise ValueError("n_colors must be an integer between 2 and 6")
     if not isinstance(shift, int) or (shift >= 6):
@@ -20,6 +20,8 @@ def from_colormap(cmap, n_colors, shift=0, alpha=0.7):
             [c/255 for c in rgb] + [alpha]
             for rgb in DEFAULT_RGB_VALS
         ]
+    elif isinstance(cmap, list):
+        colors = [to_rgba(color, alpha=alpha) for color in cmap]
     else:
         raise NotImplementedError("Generating colors from colormap")
     colors = colors[shift:] + colors[:shift]
