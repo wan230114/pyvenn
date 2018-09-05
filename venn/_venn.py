@@ -99,50 +99,61 @@ def get_labels(data, fill=["number"]):
             labels[k] += "(%.1f%%)" % (100.0*len(set_collections[k])/data_size)
     return labels
 
-def venn2(labels, names=['A', 'B'], **options):
-    colors = options.get('colors', [default_colors[i] for i in range(2)])
-    figsize = options.get('figsize', (9, 7))
-    dpi = options.get('dpi', 96)
-    fontsize = options.get('fontsize', 14)
-    # figure:
-    fig = plot.figure(0, figsize=figsize, dpi=dpi)
-    ax = fig.add_subplot(111, aspect='equal')
-    ax.set_axis_off()
-    ax.set_ylim(bottom=0.0, top=0.7)
-    ax.set_xlim(left=0.0, right=1.0)
-    # body:
-    draw_ellipse(fig, ax, 0.375, 0.3, 0.5, 0.5, 0.0, colors[0])
-    draw_ellipse(fig, ax, 0.625, 0.3, 0.5, 0.5, 0.0, colors[1])
-    draw_text(fig, ax, 0.74, 0.30, labels.get('01', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.26, 0.30, labels.get('10', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.50, 0.30, labels.get('11', ''), fontsize=fontsize)
-    # legend:
-    draw_text(fig, ax, 0.20, 0.56, names[0], colors[0], fontsize=fontsize)
-    draw_text(fig, ax, 0.80, 0.56, names[1], colors[1], fontsize=fontsize)
-    leg = ax.legend(names, loc='best', fancybox=True)
-    leg.get_frame().set_alpha(0.5)
-    return fig, ax
-
 ELLIPSE_COORDS = {
-    3: [[0.333, 0.633], [0.666, 0.633], [0.500, 0.310]]
+    2: [[0.375, 0.5], [0.625, 0.5]],
+    3: [[0.333, 0.633], [0.666, 0.633], [0.500, 0.310]],
+    4: [[0.350, 0.4], [0.450, 0.5], [0.544, 0.5], [0.644, 0.4]],
+    5: [[.428, .449], [.469, .543], [.558, .523], [.578, .432], [.489, .383]]
 }
+
 ELLIPSE_DIMS = {
-    3: [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]
+    2: [[0.5, 0.5], [0.5, 0.5]],
+    3: [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]],
+    4: [[0.72, 0.45], [0.72, 0.45], [0.72, 0.45], [0.72, 0.45]],
+    5: [[0.87, 0.50], [0.87, 0.50], [0.87, 0.50], [0.87, 0.50], [0.87, 0.50]]
 }
+
 ELLIPSE_ANGLES = {
-    3: [0.0, 0.0, 0.0]
+    2: [0.0, 0.0],
+    3: [0.0, 0.0, 0.0],
+    4: [140, 140, 40, 40],
+    5: [155, 82, 10, 118, 46]
 }
+
 SUBSET_COORDS = {
+    2: {
+        "01": (0.74, 0.5), "10": (0.26, 0.5), "11": (0.50, 0.5)
+    },
     3: {
         "001": (0.50, 0.27), "010": (0.73, 0.65), "011": (0.61, 0.46),
         "100": (0.27, 0.65), "101": (0.39, 0.46), "110": (0.50, 0.65),
         "111": (0.50, 0.51)
+    },
+    4: {
+        "0001": (0.85, 0.42), "0010": (0.68, 0.72), "0011": (0.77, 0.59),
+        "0100": (0.32, 0.72), "0101": (0.71, 0.30), "0110": (0.50, 0.66),
+        "0111": (0.65, 0.50), "1000": (0.14, 0.42), "1001": (0.50, 0.17),
+        "1010": (0.29, 0.30), "1011": (0.39, 0.24), "1100": (0.23, 0.59),
+        "1101": (0.61, 0.24), "1110": (0.35, 0.50), "1111": (0.50, 0.38)
+    },
+    5: {
+        "00001": (0.27, 0.11), "00010": (0.72, 0.11), "00011": (0.55, 0.13),
+        "00100": (0.91, 0.58), "00101": (0.78, 0.64), "00110": (0.84, 0.41),
+        "00111": (0.76, 0.55), "01000": (0.51, 0.90), "01001": (0.39, 0.15),
+        "01010": (0.42, 0.78), "01011": (0.50, 0.15), "01100": (0.67, 0.76),
+        "01101": (0.70, 0.71), "01110": (0.51, 0.74), "01111": (0.64, 0.67),
+        "10000": (0.10, 0.61), "10001": (0.20, 0.31), "10010": (0.76, 0.25),
+        "10011": (0.65, 0.23), "10100": (0.18, 0.50), "10101": (0.21, 0.37),
+        "10110": (0.81, 0.37), "10111": (0.74, 0.40), "11000": (0.27, 0.70),
+        "11001": (0.34, 0.25), "11010": (0.33, 0.72), "11011": (0.51, 0.22),
+        "11100": (0.25, 0.58), "11101": (0.28, 0.39), "11110": (0.36, 0.66),
+        "11111": (0.51, 0.47)
     }
 }
 
-def venn(labels, names=None, cmap=None, shift=0, alpha=0.7, figsize=(6, 6), dpi=96, fontsize=13):
-    n_venns = len(set(labels.values()))
-    if names is None:
+def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96, fontsize=13, legend_loc="upper right"):
+    n_venns = len(list(labels.keys())[0])
+    if not names:
         names = list("ABCDEF")[:n_venns]
     elif len(names) != n_venns:
         raise ValueError("Lengths of labels and names do not match")
@@ -160,107 +171,8 @@ def venn(labels, names=None, cmap=None, shift=0, alpha=0.7, figsize=(6, 6), dpi=
         draw_ellipse(figure, ax, *coords, *dims, angle, color)
     for subset, (x, y) in SUBSET_COORDS[n_venns].items():
         draw_text(figure, ax, x, y, labels.get(subset, ""), fontsize=fontsize)
-    leg = ax.legend(names, loc='best', fancybox=True)
-    leg.get_frame().set_alpha(0.5)
+    ax.legend(names, loc=legend_loc)
     return figure, ax
-
-def venn4(labels, names=['A', 'B', 'C', 'D'], **options):
-    colors = options.get('colors', [default_colors[i] for i in range(4)])
-    figsize = options.get('figsize', (12, 12))
-    dpi = options.get('dpi', 96)
-    fontsize = options.get('fontsize', 14)
-    # figure:
-    fig = plot.figure(0, figsize=figsize, dpi=dpi)
-    ax = fig.add_subplot(111, aspect='equal')
-    ax.set_axis_off()
-    ax.set_ylim(bottom=0.0, top=1.0)
-    ax.set_xlim(left=0.0, right=1.0)
-    # body:
-    draw_ellipse(fig, ax, 0.350, 0.400, 0.72, 0.45, 140.0, colors[0])
-    draw_ellipse(fig, ax, 0.450, 0.500, 0.72, 0.45, 140.0, colors[1])
-    draw_ellipse(fig, ax, 0.544, 0.500, 0.72, 0.45, 40.0, colors[2])
-    draw_ellipse(fig, ax, 0.644, 0.400, 0.72, 0.45, 40.0, colors[3])
-    draw_text(fig, ax, 0.85, 0.42, labels.get('0001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.68, 0.72, labels.get('0010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.77, 0.59, labels.get('0011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.32, 0.72, labels.get('0100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.71, 0.30, labels.get('0101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.50, 0.66, labels.get('0110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.65, 0.50, labels.get('0111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.14, 0.42, labels.get('1000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.50, 0.17, labels.get('1001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.29, 0.30, labels.get('1010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.39, 0.24, labels.get('1011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.23, 0.59, labels.get('1100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.61, 0.24, labels.get('1101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.35, 0.50, labels.get('1110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.50, 0.38, labels.get('1111', ''), fontsize=fontsize)
-    # legend:
-    draw_text(fig, ax, 0.13, 0.18, names[0], colors[0], fontsize=fontsize)
-    draw_text(fig, ax, 0.18, 0.83, names[1], colors[1], fontsize=fontsize)
-    draw_text(fig, ax, 0.82, 0.83, names[2], colors[2], fontsize=fontsize)
-    draw_text(fig, ax, 0.87, 0.18, names[3], colors[3], fontsize=fontsize)
-    leg = ax.legend(names, loc='best', fancybox=True)
-    leg.get_frame().set_alpha(0.5)
-    return fig, ax
-
-def venn5(labels, names=['A', 'B', 'C', 'D', 'E'], **options):
-    colors = options.get('colors', [default_colors[i] for i in range(5)])
-    figsize = options.get('figsize', (13, 13))
-    dpi = options.get('dpi', 96)
-    fontsize = options.get('fontsize', 14)
-    # figure:
-    fig = plot.figure(0, figsize=figsize, dpi=dpi)
-    ax = fig.add_subplot(111, aspect='equal')
-    ax.set_axis_off()
-    ax.set_ylim(bottom=0.0, top=1.0)
-    ax.set_xlim(left=0.0, right=1.0)
-    # body:
-    draw_ellipse(fig, ax, 0.428, 0.449, 0.87, 0.50, 155.0, colors[0])
-    draw_ellipse(fig, ax, 0.469, 0.543, 0.87, 0.50, 82.0, colors[1])
-    draw_ellipse(fig, ax, 0.558, 0.523, 0.87, 0.50, 10.0, colors[2])
-    draw_ellipse(fig, ax, 0.578, 0.432, 0.87, 0.50, 118.0, colors[3])
-    draw_ellipse(fig, ax, 0.489, 0.383, 0.87, 0.50, 46.0, colors[4])
-    draw_text(fig, ax, 0.27, 0.11, labels.get('00001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.72, 0.11, labels.get('00010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.55, 0.13, labels.get('00011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.91, 0.58, labels.get('00100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.78, 0.64, labels.get('00101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.84, 0.41, labels.get('00110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.76, 0.55, labels.get('00111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.51, 0.90, labels.get('01000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.39, 0.15, labels.get('01001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.42, 0.78, labels.get('01010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.50, 0.15, labels.get('01011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.67, 0.76, labels.get('01100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.70, 0.71, labels.get('01101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.51, 0.74, labels.get('01110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.64, 0.67, labels.get('01111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.10, 0.61, labels.get('10000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.20, 0.31, labels.get('10001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.76, 0.25, labels.get('10010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.65, 0.23, labels.get('10011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.18, 0.50, labels.get('10100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.21, 0.37, labels.get('10101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.81, 0.37, labels.get('10110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.74, 0.40, labels.get('10111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.27, 0.70, labels.get('11000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.34, 0.25, labels.get('11001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.33, 0.72, labels.get('11010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.51, 0.22, labels.get('11011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.25, 0.58, labels.get('11100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.28, 0.39, labels.get('11101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.36, 0.66, labels.get('11110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.51, 0.47, labels.get('11111', ''), fontsize=fontsize)
-    # legend:
-    draw_text(fig, ax, 0.02, 0.72, names[0], colors[0], fontsize=fontsize)
-    draw_text(fig, ax, 0.72, 0.94, names[1], colors[1], fontsize=fontsize)
-    draw_text(fig, ax, 0.97, 0.74, names[2], colors[2], fontsize=fontsize)
-    draw_text(fig, ax, 0.88, 0.05, names[3], colors[3], fontsize=fontsize)
-    draw_text(fig, ax, 0.12, 0.05, names[4], colors[4], fontsize=fontsize)
-    leg = ax.legend(names, loc='best', fancybox=True)
-    leg.get_frame().set_alpha(0.5)
-    return fig, ax
 
 def venn6(labels, names=['A', 'B', 'C', 'D', 'E'], **options):
     colors = options.get('colors', [default_colors[i] for i in range(6)])
