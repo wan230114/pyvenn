@@ -4,19 +4,26 @@ import matplotlib.patches as patches
 from matplotlib import colors
 import math
 
-default_colors = [
-    # r, g, b, a
-    [92, 192, 98, 0.5],
-    [90, 155, 212, 0.5],
-    [246, 236, 86, 0.6],
-    [241, 90, 96, 0.4],
-    [255, 117, 0, 0.3],
-    [82, 82, 190, 0.2],
+DEFAULT_RGB_VALS = [
+    [92, 192, 98], [90, 155, 212], [246, 236, 86],
+    [241, 90, 96], [255, 117, 00], [82, 82, 190]
 ]
-default_colors = [
-    [i[0] / 255.0, i[1] / 255.0, i[2] / 255.0, i[3]]
-    for i in default_colors
-]
+
+def from_colormap(cmap, n_colors, shift=0, alpha=0.7):
+    """Generate colors from matplotlib colormap; pass cmap=None to fall back to default colors"""
+    if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
+        raise ValueError("n_colors must be an integer between 2 and 6")
+    if not isinstance(shift, int) or (shift >= 6):
+        raise ValueError("shift must be an integer smaller than 6")
+    if cmap is None:
+        colors = [
+            [c/255 for c in rgb] + [alpha]
+            for rgb in DEFAULT_RGB_VALS
+        ]
+    else:
+        raise NotImplementedError("Generating colors from colormap")
+    colors = colors[shift:] + colors[:shift]
+    return colors[:n_colors]
 
 def draw_ellipse(fig, ax, x, y, w, h, a, fillcolor):
     e = patches.Ellipse(
@@ -114,13 +121,10 @@ def venn2(labels, names=['A', 'B'], **options):
     leg.get_frame().set_alpha(0.5)
     return fig, ax
 
-def venn3(labels, names=['A', 'B', 'C'], **options):
-    colors = options.get('colors', [default_colors[i] for i in range(3)])
-    figsize = options.get('figsize', (9, 9))
-    dpi = options.get('dpi', 96)
-    fontsize = options.get('fontsize', 14)
+def venn3(labels, names=['A', 'B', 'C'], cmap=None, shift=0, alpha=0.7, figsize=(6, 6), dpi=96, fontsize=13):
+    colors = from_colormap(cmap, n_colors=3, shift=shift, alpha=alpha)
     # figure:
-    fig = plt.figure(0, figsize=figsize, dpi=dpi)
+    fig = plt.figure(figsize=figsize, dpi=dpi)
     ax = fig.add_subplot(111, aspect='equal')
     ax.set_axis_off()
     ax.set_ylim(bottom=0.0, top=1.0)
