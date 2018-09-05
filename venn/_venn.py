@@ -1,8 +1,7 @@
 from itertools import chain
-from matplotlib.pyplot import subplots, annotate
-import matplotlib.patches as patches
+from matplotlib.pyplot import subplots
+from matplotlib import patches
 from matplotlib.colors import to_rgba
-import math
 
 DEFAULT_RGB_VALS = [
     [92, 192, 98], [90, 155, 212], [246, 236, 86],
@@ -55,20 +54,6 @@ def draw_text(fig, ax, x, y, text, color=[0, 0, 0, 1], fontsize=14):
         verticalalignment='center',
         fontsize=fontsize,
         color=color)
-
-def draw_annotate(fig, ax, x, y, textx, texty, text, color=[0, 0, 0, 1], arrowcolor=[0, 0, 0, 0.3]):
-    annotate(
-        text,
-        xy=(x, y),
-        xytext=(textx, texty),
-        arrowprops=dict(color=arrowcolor, shrink=0, width=0.5, headwidth=8),
-        fontsize=14,
-        color=color,
-        xycoords="data",
-        textcoords="data",
-        horizontalalignment='center',
-        verticalalignment='center'
-    )
 
 def get_labels(data, fill=["number"]):
     N = len(data)
