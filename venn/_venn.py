@@ -7,7 +7,7 @@ from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from ._constants import PETAL_LABEL_COORDS, VENN_AXIS_KW
 from copy import copy
 
-def select_colors(n_colors=6, cmap=list("rgbymc"), alpha=.5):
+def select_colors(n_colors=6, cmap="viridis", alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors or cmap=None to fall back to default"""
     if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
         raise ValueError("n_colors must be an integer between 2 and 6")
