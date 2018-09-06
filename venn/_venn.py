@@ -18,16 +18,27 @@ def select_colors(n_colors=6, cmap="viridis", alpha=.4):
         colors = scalar_mappable.to_rgba(range(n_colors), alpha=alpha)
     return colors[:n_colors]
 
+def less_transparent_color(color, alpha_factor=2):
+    """Bump up color's alpha"""
+    new_alpha = (1 + to_rgba(color)[3]) / 2
+    return to_rgba(color, alpha=new_alpha)
+
 def draw_ellipse(ax, x, y, w, h, a, color):
     """Wrapper for drawing ellipse; called like `draw_ellipse(ax, *coords, *dims, angle, color)`"""
     ax.add_patch(
-        Ellipse(xy=(x,y), width=w, height=h, angle=a, color=color)
+        Ellipse(
+            xy=(x,y), width=w, height=h, angle=a,
+            facecolor=color, edgecolor=less_transparent_color(color)
+        )
     )
 
 def draw_triangle(ax, x1, y1, x2, y2, x3, y3, _dim, _angle, color):
     """Wrapper for drawing triangle; called like `draw_triangle(ax, *coords, None, None, color)`"""
     ax.add_patch(
-        Polygon(xy=[(x1, y1), (x2, y2), (x3, y3)], closed=True, color=color)
+        Polygon(
+            xy=[(x1, y1), (x2, y2), (x3, y3)], closed=True,
+            facecolor=color, edgecolor=less_transparent_color(color)
+        )
     )
 
 def draw_text(ax, x, y, text, fontsize, color="black"):
