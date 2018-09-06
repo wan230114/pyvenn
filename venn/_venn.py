@@ -84,28 +84,28 @@ def get_labels(data, fill=["number"]):
             labels[k] += "(%.1f%%)" % (100.0*len(set_collections[k])/data_size)
     return labels
 
-ELLIPSE_COORDS = {
+SHAPE_COORDS = {
     2: [[0.375, 0.5], [0.625, 0.5]],
     3: [[0.333, 0.633], [0.666, 0.633], [0.500, 0.310]],
     4: [[0.350, 0.4], [0.450, 0.5], [0.544, 0.5], [0.644, 0.4]],
     5: [[.428, .449], [.469, .543], [.558, .523], [.578, .432], [.489, .383]]
 }
 
-ELLIPSE_DIMS = {
+SHAPE_DIMS = {
     2: [[0.5, 0.5], [0.5, 0.5]],
     3: [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]],
     4: [[0.72, 0.45], [0.72, 0.45], [0.72, 0.45], [0.72, 0.45]],
     5: [[0.87, 0.50], [0.87, 0.50], [0.87, 0.50], [0.87, 0.50], [0.87, 0.50]]
 }
 
-ELLIPSE_ANGLES = {
+SHAPE_ANGLES = {
     2: [0.0, 0.0],
     3: [0.0, 0.0, 0.0],
     4: [140, 140, 40, 40],
     5: [155, 82, 10, 118, 46]
 }
 
-SUBSET_COORDS = {
+LABEL_COORDS = {
     2: {
         "01": (0.74, 0.5), "10": (0.26, 0.5), "11": (0.50, 0.5)
     },
@@ -137,24 +137,27 @@ SUBSET_COORDS = {
 }
 
 def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96, fontsize=13, legend_loc="upper right"):
-    n_venns = len(list(labels.keys())[0])
+    n_sets = len(list(labels.keys())[0])
     if not names:
-        names = list("ABCDEF")[:n_venns]
-    elif len(names) != n_venns:
+        names = list("ABCDEF")[:n_sets]
+    elif len(names) != n_sets:
         raise ValueError("Lengths of labels and names do not match")
-    colors = from_colormap(cmap, n_colors=n_venns, shift=shift, alpha=alpha)
+    colors = from_colormap(cmap, n_colors=n_sets, shift=shift, alpha=alpha)
     figure, ax = subplots(
         nrows=1, ncols=1, figsize=figsize, dpi=dpi, subplot_kw={
             "aspect": "equal", "frame_on": False, "xticks": [], "yticks": []
         }
     )
-    ellipse_params = zip(
-        ELLIPSE_COORDS[n_venns], ELLIPSE_DIMS[n_venns],
-        ELLIPSE_ANGLES[n_venns], colors
+    shape_params = zip(
+        SHAPE_COORDS[n_sets], SHAPE_DIMS[n_sets], SHAPE_ANGLES[n_sets], colors
     )
-    for coords, dims, angle, color in ellipse_params:
-        draw_ellipse(figure, ax, *coords, *dims, angle, color)
-    for subset, (x, y) in SUBSET_COORDS[n_venns].items():
+    if n_sets < 6:
+        draw_shape = draw_ellipse
+    else:
+        raise NotImplementedError("draw_shape = draw_triangle")
+    for coords, dims, angle, color in shape_params:
+        draw_shape(figure, ax, *coords, *dims, angle, color)
+    for subset, (x, y) in LABEL_COORDS[n_sets].items():
         draw_text(figure, ax, x, y, labels.get(subset, ""), fontsize=fontsize)
     ax.legend(names, loc=legend_loc)
     return figure, ax
