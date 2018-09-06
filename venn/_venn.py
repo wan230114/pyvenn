@@ -65,6 +65,7 @@ def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
     return petals
 
 def venn(*, petals, labels, cmap=None, alpha=.5, figsize=(8, 8), fontsize=13, legend_loc="upper right"):
+    """Draw prepared petals with provided labels"""
     n_sets = len(labels)
     if n_sets != len(list(petals.keys())[0]):
         raise ValueError("Lengths of petals and labels do not match")
