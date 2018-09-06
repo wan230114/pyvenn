@@ -2,25 +2,16 @@ from itertools import chain
 from matplotlib.pyplot import subplots
 from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
-from venn._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
-from venn._constants import DEFAULT_RGB_VALS, LABEL_COORDS
+from venn._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES, LABEL_COORDS
 
-def from_colormap(cmap, n_colors, shift=0, alpha=0.7):
+def from_colormap(cmap=list("rgbymc"), n_colors=6, alpha=.5):
     """Generate colors from matplotlib colormap; pass list to use exact colors or cmap=None to fall back to default"""
     if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
         raise ValueError("n_colors must be an integer between 2 and 6")
-    if not isinstance(shift, int) or (shift >= 6):
-        raise ValueError("shift must be an integer smaller than 6")
-    if cmap is None:
-        colors = [
-            [c/255 for c in rgb] + [alpha]
-            for rgb in DEFAULT_RGB_VALS
-        ]
-    elif isinstance(cmap, list):
+    if isinstance(cmap, list):
         colors = [to_rgba(color, alpha=alpha) for color in cmap]
     else:
         raise NotImplementedError("Generating colors from colormap")
-    colors = colors[shift:] + colors[:shift]
     return colors[:n_colors]
 
 def draw_ellipse(ax, x, y, w, h, a, color):
@@ -71,7 +62,7 @@ def get_labels(data, fill=["number"]):
             labels[k] += "(%.1f%%)" % (100.0*len(set_collections[k])/data_size)
     return labels
 
-def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96, fontsize=13, legend_loc="upper right"):
+def venn(labels, names=[], cmap=None, alpha=.5, figsize=(6, 6), dpi=96, fontsize=13, legend_loc="upper right"):
     n_sets = len(list(labels.keys())[0])
     if not names:
         names = list("ABCDEF")[:n_sets]
@@ -79,7 +70,7 @@ def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96,
         raise ValueError("Lengths of labels and names do not match")
     if (n_sets < 2) or (n_sets > 6):
         raise ValueError("Number of sets must be between 2 and 6")
-    colors = from_colormap(cmap, n_colors=n_sets, shift=shift, alpha=alpha)
+    colors = from_colormap(n_colors=n_sets, alpha=alpha)
     figure, ax = subplots(
         nrows=1, ncols=1, figsize=figsize, dpi=dpi, subplot_kw={
             "aspect": "equal", "frame_on": False, "xticks": [], "yticks": []
