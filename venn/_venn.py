@@ -35,7 +35,7 @@ def draw_ellipse(fig, ax, x, y, w, h, a, fillcolor):
         color=fillcolor)
     ax.add_patch(e)
 
-def draw_triangle(fig, ax, x1, y1, x2, y2, x3, y3, fillcolor):
+def draw_triangle(fig, ax, x1, y1, x2, y2, x3, y3, _dim, _angle, fillcolor):
     xy = [
         (x1, y1),
         (x2, y2),
@@ -88,21 +88,31 @@ SHAPE_COORDS = {
     2: [[0.375, 0.5], [0.625, 0.5]],
     3: [[0.333, 0.633], [0.666, 0.633], [0.500, 0.310]],
     4: [[0.350, 0.4], [0.450, 0.5], [0.544, 0.5], [0.644, 0.4]],
-    5: [[.428, .449], [.469, .543], [.558, .523], [.578, .432], [.489, .383]]
+    5: [[.428, .449], [.469, .543], [.558, .523], [.578, .432], [.489, .383]],
+    6: [
+        [.637, .921, .649, .274, .188, .667],
+        [.981, .769, .335, .191, .393, .671],
+        [.941, .397, .292, .475, .456, .747],
+        [.662, .119, .316, .548, .662, .700],
+        [.309, .081, .374, .718, .681, .488],
+        [.016, .626, .726, .687, .522, .327]
+    ]
 }
 
 SHAPE_DIMS = {
     2: [[0.5, 0.5], [0.5, 0.5]],
     3: [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]],
     4: [[0.72, 0.45], [0.72, 0.45], [0.72, 0.45], [0.72, 0.45]],
-    5: [[0.87, 0.50], [0.87, 0.50], [0.87, 0.50], [0.87, 0.50], [0.87, 0.50]]
+    5: [[0.87, 0.50], [0.87, 0.50], [0.87, 0.50], [0.87, 0.50], [0.87, 0.50]],
+    6: [[None]]*6
 }
 
 SHAPE_ANGLES = {
     2: [0.0, 0.0],
     3: [0.0, 0.0, 0.0],
     4: [140, 140, 40, 40],
-    5: [155, 82, 10, 118, 46]
+    5: [155, 82, 10, 118, 46],
+    6: [None]*6
 }
 
 LABEL_COORDS = {
@@ -133,6 +143,29 @@ LABEL_COORDS = {
         "11001": (0.34, 0.25), "11010": (0.33, 0.72), "11011": (0.51, 0.22),
         "11100": (0.25, 0.58), "11101": (0.28, 0.39), "11110": (0.36, 0.66),
         "11111": (0.51, 0.47)
+    },
+    6: {
+        "000001": (.212, .562), "000010": (.430, .249), "000011": (.356, .444),
+        "000100": (.609, .255), "000101": (.323, .546), "000110": (.513, .316),
+        "000111": (.523, .348), "001000": (.747, .458), "001001": (.325, .492),
+        "001010": (.670, .481), "001011": (.359, .478), "001100": (.653, .444),
+        "001101": (.344, .526), "001110": (.653, .466), "001111": (.363, .503),
+        "010000": (.750, .616), "010001": (.682, .654), "010010": (.402, .310),
+        "010011": (.392, .421), "010100": (.653, .691), "010101": (.651, .644),
+        "010110": (.490, .340), "010111": (.468, .399), "011000": (.692, .545),
+        "011001": (.666, .592), "011010": (.665, .496), "011011": (.374, .470),
+        "011100": (.653, .537), "011101": (.652, .579), "011110": (.653, .488),
+        "011111": (.389, .486), "100000": (.553, .806), "100001": (.313, .604),
+        "100010": (.388, .694), "100011": (.375, .633), "100100": (.605, .359),
+        "100101": (.334, .555), "100110": (.582, .397), "100111": (.542, .372),
+        "101000": (.468, .708), "101001": (.355, .572), "101010": (.420, .679),
+        "101011": (.375, .597), "101100": (.641, .436), "101101": (.348, .538),
+        "101110": (.635, .453), "101111": (.370, .548), "110000": (.594, .689),
+        "110001": (.579, .670), "110010": (.398, .670), "110011": (.395, .653),
+        "110100": (.633, .682), "110101": (.616, .656), "110110": (.587, .427),
+        "110111": (.526, .415), "111000": (.495, .677), "111001": (.505, .648),
+        "111010": (.428, .663), "111011": (.430, .631), "111100": (.639, .524),
+        "111101": (.591, .604), "111110": (.622, .477), "111111": (.501, .523)
     }
 }
 
@@ -154,7 +187,7 @@ def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96,
     if n_sets < 6:
         draw_shape = draw_ellipse
     else:
-        raise NotImplementedError("draw_shape = draw_triangle")
+        draw_shape = draw_triangle
     for coords, dims, angle, color in shape_params:
         draw_shape(figure, ax, *coords, *dims, angle, color)
     for subset, (x, y) in LABEL_COORDS[n_sets].items():
@@ -162,95 +195,3 @@ def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96,
     if legend_loc is not None:
         ax.legend(names, loc=legend_loc)
     return figure, ax
-
-def venn6(labels, names=['A', 'B', 'C', 'D', 'E'], **options):
-    colors = options.get('colors', [default_colors[i] for i in range(6)])
-    figsize = options.get('figsize', (20, 20))
-    dpi = options.get('dpi', 96)
-    fontsize = options.get('fontsize', 14)
-    # figure:
-    fig = plot.figure(0, figsize=figsize, dpi=dpi)
-    ax = fig.add_subplot(111, aspect='equal')
-    ax.set_axis_off()
-    ax.set_ylim(bottom=0.230, top=0.845)
-    ax.set_xlim(left=0.173, right=0.788)
-    # body:
-    draw_triangle(fig, ax, 0.637, 0.921, 0.649, 0.274, 0.188, 0.667, colors[0])
-    draw_triangle(fig, ax, 0.981, 0.769, 0.335, 0.191, 0.393, 0.671, colors[1])
-    draw_triangle(fig, ax, 0.941, 0.397, 0.292, 0.475, 0.456, 0.747, colors[2])
-    draw_triangle(fig, ax, 0.662, 0.119, 0.316, 0.548, 0.662, 0.700, colors[3])
-    draw_triangle(fig, ax, 0.309, 0.081, 0.374, 0.718, 0.681, 0.488, colors[4])
-    draw_triangle(fig, ax, 0.016, 0.626, 0.726, 0.687, 0.522, 0.327, colors[5])
-    draw_text(fig, ax, 0.212, 0.562, labels.get('000001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.430, 0.249, labels.get('000010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.356, 0.444, labels.get('000011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.609, 0.255, labels.get('000100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.323, 0.546, labels.get('000101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.513, 0.316, labels.get('000110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.523, 0.348, labels.get('000111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.747, 0.458, labels.get('001000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.325, 0.492, labels.get('001001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.670, 0.481, labels.get('001010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.359, 0.478, labels.get('001011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.653, 0.444, labels.get('001100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.344, 0.526, labels.get('001101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.653, 0.466, labels.get('001110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.363, 0.503, labels.get('001111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.750, 0.616, labels.get('010000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.682, 0.654, labels.get('010001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.402, 0.310, labels.get('010010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.392, 0.421, labels.get('010011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.653, 0.691, labels.get('010100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.651, 0.644, labels.get('010101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.490, 0.340, labels.get('010110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.468, 0.399, labels.get('010111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.692, 0.545, labels.get('011000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.666, 0.592, labels.get('011001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.665, 0.496, labels.get('011010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.374, 0.470, labels.get('011011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.653, 0.537, labels.get('011100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.652, 0.579, labels.get('011101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.653, 0.488, labels.get('011110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.389, 0.486, labels.get('011111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.553, 0.806, labels.get('100000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.313, 0.604, labels.get('100001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.388, 0.694, labels.get('100010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.375, 0.633, labels.get('100011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.605, 0.359, labels.get('100100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.334, 0.555, labels.get('100101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.582, 0.397, labels.get('100110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.542, 0.372, labels.get('100111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.468, 0.708, labels.get('101000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.355, 0.572, labels.get('101001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.420, 0.679, labels.get('101010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.375, 0.597, labels.get('101011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.641, 0.436, labels.get('101100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.348, 0.538, labels.get('101101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.635, 0.453, labels.get('101110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.370, 0.548, labels.get('101111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.594, 0.689, labels.get('110000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.579, 0.670, labels.get('110001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.398, 0.670, labels.get('110010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.395, 0.653, labels.get('110011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.633, 0.682, labels.get('110100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.616, 0.656, labels.get('110101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.587, 0.427, labels.get('110110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.526, 0.415, labels.get('110111', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.495, 0.677, labels.get('111000', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.505, 0.648, labels.get('111001', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.428, 0.663, labels.get('111010', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.430, 0.631, labels.get('111011', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.639, 0.524, labels.get('111100', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.591, 0.604, labels.get('111101', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.622, 0.477, labels.get('111110', ''), fontsize=fontsize)
-    draw_text(fig, ax, 0.501, 0.523, labels.get('111111', ''), fontsize=fontsize)
-    # legend:
-    draw_text(fig, ax, 0.674, 0.824, names[0], colors[0], fontsize=fontsize)
-    draw_text(fig, ax, 0.747, 0.751, names[1], colors[1], fontsize=fontsize)
-    draw_text(fig, ax, 0.739, 0.396, names[2], colors[2], fontsize=fontsize)
-    draw_text(fig, ax, 0.700, 0.247, names[3], colors[3], fontsize=fontsize)
-    draw_text(fig, ax, 0.291, 0.255, names[4], colors[4], fontsize=fontsize)
-    draw_text(fig, ax, 0.203, 0.484, names[5], colors[5], fontsize=fontsize)
-    leg = ax.legend(names, loc='best', fancybox=True)
-    leg.get_frame().set_alpha(0.5)
-    return fig, ax
