@@ -4,7 +4,7 @@ from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from venn._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES, LABEL_COORDS
 
-def from_colormap(cmap=list("rgbymc"), n_colors=6, alpha=.5):
+def select_colors(n_colors=6, cmap=list("rgbymc"), alpha=.5):
     """Generate colors from matplotlib colormap; pass list to use exact colors or cmap=None to fall back to default"""
     if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
         raise ValueError("n_colors must be an integer between 2 and 6")
@@ -63,31 +63,29 @@ def generate_labels(datasets, fmt="{size} ({percentage:.1f}%)"):
         )
     return labels
 
-def venn(labels, names=[], cmap=None, alpha=.5, figsize=(6, 6), dpi=96, fontsize=13, legend_loc="upper right"):
+def venn(labels, names, cmap=None, alpha=.5, figsize=(8, 8), fontsize=13, legend_loc="upper right"):
     n_sets = len(list(labels.keys())[0])
-    if not names:
-        names = list("ABCDEF")[:n_sets]
-    elif len(names) != n_sets:
+    if len(names) != n_sets:
         raise ValueError("Lengths of labels and names do not match")
-    if (n_sets < 2) or (n_sets > 6):
-        raise ValueError("Number of sets must be between 2 and 6")
-    colors = from_colormap(n_colors=n_sets, alpha=alpha)
+    colors = select_colors(n_colors=n_sets, alpha=alpha)
     figure, ax = subplots(
-        nrows=1, ncols=1, figsize=figsize, dpi=dpi, subplot_kw={
+        nrows=1, ncols=1, figsize=figsize, subplot_kw={
             "aspect": "equal", "frame_on": False, "xticks": [], "yticks": []
         }
     )
+    if 2 <= n_sets < 6:
+        draw_shape = draw_ellipse
+    elif n_sets == 6:
+        draw_shape = draw_triangle
+    else:
+        raise ValueError("Number of sets must be between 2 and 6")
     shape_params = zip(
         SHAPE_COORDS[n_sets], SHAPE_DIMS[n_sets], SHAPE_ANGLES[n_sets], colors
     )
-    if n_sets < 6:
-        draw_shape = draw_ellipse
-    else:
-        draw_shape = draw_triangle
     for coords, dims, angle, color in shape_params:
         draw_shape(ax, *coords, *dims, angle, color)
     for subset, (x, y) in LABEL_COORDS[n_sets].items():
-        draw_text(ax, x, y, labels.get(subset, ""), fontsize=fontsize)
+        draw_text(ax, x, y, labels.get(subset, ""), fontsize)
     if legend_loc is not None:
-        ax.legend(names, loc=legend_loc)
+        ax.legend(names, loc=legend_loc, prop={"size": fontsize})
     return figure, ax
