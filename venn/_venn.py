@@ -2,6 +2,7 @@ from itertools import chain
 from matplotlib.pyplot import subplots
 from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
+from matplotlib.cm import ScalarMappable
 from _constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from _constants import PETAL_LABEL_COORDS, VENN_AXIS_KW
 from copy import copy
@@ -13,7 +14,8 @@ def select_colors(n_colors=6, cmap=list("rgbymc"), alpha=.5):
     if isinstance(cmap, list):
         colors = [to_rgba(color, alpha=alpha) for color in cmap]
     else:
-        raise NotImplementedError("Generating colors from colormap")
+        scalar_mappable = ScalarMappable(cmap=cmap)
+        colors = scalar_mappable.to_rgba(range(n_colors), alpha=alpha)
     return colors[:n_colors]
 
 def draw_ellipse(ax, x, y, w, h, a, color):
@@ -70,7 +72,7 @@ def venn(*, petals, labels, cmap=None, alpha=.5, figsize=(8, 8), fontsize=13, le
     n_sets = len(labels)
     if n_sets != len(list(petals.keys())[0]):
         raise ValueError("Lengths of petals and labels do not match")
-    colors = select_colors(n_colors=n_sets, alpha=alpha)
+    colors = select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha)
     if ax is None:
         figure, ax = subplots(
             nrows=1, ncols=1, figsize=figsize, subplot_kw=copy(VENN_AXIS_KW)
