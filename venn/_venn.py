@@ -33,33 +33,34 @@ def draw_text(ax, x, y, text, fontsize, color="black"):
         horizontalalignment="center", verticalalignment="center"
     )
 
-def get_labels(data, fill=["number"]):
-    N = len(data)
-    sets_data = [set(data[i]) for i in range(N)] # sets for separate groups
-    s_all = set(chain(*data)) # union of all sets
-    # bin(3) --> '0b11', so bin(3).split('0b')[-1] will remove "0b"
-    set_collections = {}
-    for n in range(1, 2**N):
-        key = bin(n).split('0b')[-1].zfill(N)
-        value = s_all
-        sets_for_intersection = [sets_data[i] for i in range(N) if key[i]=='1']
-        sets_for_difference = [sets_data[i] for i in range(N) if key[i]=='0']
+def generate_logics(n_sets):
+    """Generate intersection identifiers in binary (0010 etc)"""
+    for i in range(1, 2**n_sets):
+        yield bin(i).split('0b')[-1].zfill(n_sets)
+
+def generate_labels(datasets, fmt="{size} ({percentage:.1f}%)"):
+    """Generate labels for venn diagram based on set sizes"""
+    n_sets = len(datasets)
+    datasets = [set(datasets[i]) for i in range(n_sets)]
+    dataset_union = set(chain(*datasets))
+    universe_size = len(dataset_union)
+    labels = {}
+    for logic in generate_logics(n_sets):
+        petal = dataset_union
+        sets_for_intersection = [
+            datasets[i] for i in range(n_sets) if logic[i] == "1"
+        ]
         for s in sets_for_intersection:
-            value = value & s
+            petal = petal & s
+        sets_for_difference = [
+            datasets[i] for i in range(n_sets) if logic[i] == "0"
+        ]
         for s in sets_for_difference:
-            value = value - s
-        set_collections[key] = value
-    labels = {k: "" for k in set_collections}
-    if "logic" in fill:
-        for k in set_collections:
-            labels[k] = k + ": "
-    if "number" in fill:
-        for k in set_collections:
-            labels[k] += str(len(set_collections[k]))
-    if "percent" in fill:
-        data_size = len(s_all)
-        for k in set_collections:
-            labels[k] += "(%.1f%%)" % (100.0*len(set_collections[k])/data_size)
+            petal = petal - s
+        labels[logic] = fmt.format(
+            logic=logic, size=len(petal),
+            percentage=(100*len(petal)/universe_size)
+        )
     return labels
 
 def venn(labels, names=[], cmap=None, alpha=.5, figsize=(6, 6), dpi=96, fontsize=13, legend_loc="upper right"):
