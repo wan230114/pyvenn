@@ -3,7 +3,8 @@ from matplotlib.pyplot import subplots
 from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from _constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
-from _constants import PETAL_LABEL_COORDS
+from _constants import PETAL_LABEL_COORDS, VENN_AXIS_KW
+from copy import copy
 
 def select_colors(n_colors=6, cmap=list("rgbymc"), alpha=.5):
     """Generate colors from matplotlib colormap; pass list to use exact colors or cmap=None to fall back to default"""
@@ -64,17 +65,19 @@ def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
         )
     return petals
 
-def venn(*, petals, labels, cmap=None, alpha=.5, figsize=(8, 8), fontsize=13, legend_loc="upper right"):
+def venn(*, petals, labels, cmap=None, alpha=.5, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
     """Draw prepared petals with provided labels"""
     n_sets = len(labels)
     if n_sets != len(list(petals.keys())[0]):
         raise ValueError("Lengths of petals and labels do not match")
     colors = select_colors(n_colors=n_sets, alpha=alpha)
-    figure, ax = subplots(
-        nrows=1, ncols=1, figsize=figsize, subplot_kw={
-            "aspect": "equal", "frame_on": False, "xticks": [], "yticks": []
-        }
-    )
+    if ax is None:
+        figure, ax = subplots(
+            nrows=1, ncols=1, figsize=figsize, subplot_kw=copy(VENN_AXIS_KW)
+        )
+    else:
+        figure = ax.figure
+        ax.set(**copy(VENN_AXIS_KW))
     if 2 <= n_sets < 6:
         draw_shape = draw_ellipse
     elif n_sets == 6:
