@@ -1,6 +1,6 @@
 from itertools import chain
 from matplotlib.pyplot import subplots
-from matplotlib import patches
+from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from venn._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from venn._constants import DEFAULT_RGB_VALS, LABEL_COORDS
@@ -23,34 +23,24 @@ def from_colormap(cmap, n_colors, shift=0, alpha=0.7):
     colors = colors[shift:] + colors[:shift]
     return colors[:n_colors]
 
-def draw_ellipse(fig, ax, x, y, w, h, a, fillcolor):
-    e = patches.Ellipse(
-        xy=(x, y),
-        width=w,
-        height=h,
-        angle=a,
-        color=fillcolor)
-    ax.add_patch(e)
+def draw_ellipse(ax, x, y, w, h, a, color):
+    """Wrapper for drawing ellipse; called like `draw_ellipse(ax, *coords, *dims, angle, color)`"""
+    ax.add_patch(
+        Ellipse(xy=(x,y), width=w, height=h, angle=a, color=color)
+    )
 
-def draw_triangle(fig, ax, x1, y1, x2, y2, x3, y3, _dim, _angle, fillcolor):
-    xy = [
-        (x1, y1),
-        (x2, y2),
-        (x3, y3),
-    ]
-    polygon = patches.Polygon(
-        xy=xy,
-        closed=True,
-        color=fillcolor)
-    ax.add_patch(polygon)
+def draw_triangle(ax, x1, y1, x2, y2, x3, y3, _dim, _angle, color):
+    """Wrapper for drawing triangle; called like `draw_triangle(ax, *coords, None, None, color)`"""
+    ax.add_patch(
+        Polygon(xy=[(x1, y1), (x2, y2), (x3, y3)], closed=True, color=color)
+    )
 
-def draw_text(fig, ax, x, y, text, color=[0, 0, 0, 1], fontsize=14):
+def draw_text(ax, x, y, text, fontsize, color="black"):
+    """Wrapper for drawing text"""
     ax.text(
-        x, y, text,
-        horizontalalignment='center',
-        verticalalignment='center',
-        fontsize=fontsize,
-        color=color)
+        x, y, text, fontsize=fontsize, color=color,
+        horizontalalignment="center", verticalalignment="center"
+    )
 
 def get_labels(data, fill=["number"]):
     N = len(data)
@@ -101,9 +91,9 @@ def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96,
     else:
         draw_shape = draw_triangle
     for coords, dims, angle, color in shape_params:
-        draw_shape(figure, ax, *coords, *dims, angle, color)
+        draw_shape(ax, *coords, *dims, angle, color)
     for subset, (x, y) in LABEL_COORDS[n_sets].items():
-        draw_text(figure, ax, x, y, labels.get(subset, ""), fontsize=fontsize)
+        draw_text(ax, x, y, labels.get(subset, ""), fontsize=fontsize)
     if legend_loc is not None:
         ax.legend(names, loc=legend_loc)
     return figure, ax
