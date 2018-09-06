@@ -77,6 +77,8 @@ def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96,
         names = list("ABCDEF")[:n_sets]
     elif len(names) != n_sets:
         raise ValueError("Lengths of labels and names do not match")
+    if (n_sets < 2) or (n_sets > 6):
+        raise ValueError("Number of sets must be between 2 and 6")
     colors = from_colormap(cmap, n_colors=n_sets, shift=shift, alpha=alpha)
     figure, ax = subplots(
         nrows=1, ncols=1, figsize=figsize, dpi=dpi, subplot_kw={
