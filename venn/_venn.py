@@ -44,6 +44,7 @@ def generate_logics(n_sets):
 
 def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
     """Generate petal descriptions for venn diagram based on set sizes"""
+    datasets = list(datasets)
     n_sets = len(datasets)
     datasets = [set(datasets[i]) for i in range(n_sets)]
     dataset_union = set(chain(*datasets))
