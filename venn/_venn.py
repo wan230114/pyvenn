@@ -159,7 +159,8 @@ def venn(labels, names=[], cmap=None, shift=0, alpha=.7, figsize=(6, 6), dpi=96,
         draw_shape(figure, ax, *coords, *dims, angle, color)
     for subset, (x, y) in LABEL_COORDS[n_sets].items():
         draw_text(figure, ax, x, y, labels.get(subset, ""), fontsize=fontsize)
-    ax.legend(names, loc=legend_loc)
+    if legend_loc is not None:
+        ax.legend(names, loc=legend_loc)
     return figure, ax
 
 def venn6(labels, names=['A', 'B', 'C', 'D', 'E'], **options):
