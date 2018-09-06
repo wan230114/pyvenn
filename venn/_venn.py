@@ -3,8 +3,8 @@ from matplotlib.pyplot import subplots
 from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from matplotlib.cm import ScalarMappable
-from _constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
-from _constants import PETAL_LABEL_COORDS, VENN_AXIS_KW
+from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
+from ._constants import PETAL_LABEL_COORDS, VENN_AXIS_KW
 from copy import copy
 
 def select_colors(n_colors=6, cmap=list("rgbymc"), alpha=.5):
