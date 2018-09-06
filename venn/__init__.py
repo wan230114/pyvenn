@@ -1,1 +1,1 @@
-from ._venn import generate_labels, venn
+from ._venn import generate_petals, venn

@@ -2,7 +2,8 @@ from itertools import chain
 from matplotlib.pyplot import subplots
 from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
-from venn._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES, LABEL_COORDS
+from _constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
+from _constants import PETAL_LABEL_COORDS
 
 def select_colors(n_colors=6, cmap=list("rgbymc"), alpha=.5):
     """Generate colors from matplotlib colormap; pass list to use exact colors or cmap=None to fall back to default"""
@@ -38,35 +39,35 @@ def generate_logics(n_sets):
     for i in range(1, 2**n_sets):
         yield bin(i).split('0b')[-1].zfill(n_sets)
 
-def generate_labels(datasets, fmt="{size} ({percentage:.1f}%)"):
-    """Generate labels for venn diagram based on set sizes"""
+def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
+    """Generate petal descriptions for venn diagram based on set sizes"""
     n_sets = len(datasets)
     datasets = [set(datasets[i]) for i in range(n_sets)]
     dataset_union = set(chain(*datasets))
     universe_size = len(dataset_union)
-    labels = {}
+    petals = {}
     for logic in generate_logics(n_sets):
-        petal = dataset_union
+        petal_set = dataset_union
         sets_for_intersection = [
             datasets[i] for i in range(n_sets) if logic[i] == "1"
         ]
         for s in sets_for_intersection:
-            petal = petal & s
+            petal_set = petal_set & s
         sets_for_difference = [
             datasets[i] for i in range(n_sets) if logic[i] == "0"
         ]
         for s in sets_for_difference:
-            petal = petal - s
-        labels[logic] = fmt.format(
-            logic=logic, size=len(petal),
-            percentage=(100*len(petal)/universe_size)
+            petal_set = petal_set - s
+        petals[logic] = fmt.format(
+            logic=logic, size=len(petal_set),
+            percentage=(100*len(petal_set)/universe_size)
         )
-    return labels
+    return petals
 
-def venn(labels, names, cmap=None, alpha=.5, figsize=(8, 8), fontsize=13, legend_loc="upper right"):
-    n_sets = len(list(labels.keys())[0])
-    if len(names) != n_sets:
-        raise ValueError("Lengths of labels and names do not match")
+def venn(*, petals, labels, cmap=None, alpha=.5, figsize=(8, 8), fontsize=13, legend_loc="upper right"):
+    n_sets = len(labels)
+    if n_sets != len(list(petals.keys())[0]):
+        raise ValueError("Lengths of petals and labels do not match")
     colors = select_colors(n_colors=n_sets, alpha=alpha)
     figure, ax = subplots(
         nrows=1, ncols=1, figsize=figsize, subplot_kw={
@@ -84,8 +85,8 @@ def venn(labels, names, cmap=None, alpha=.5, figsize=(8, 8), fontsize=13, legend
     )
     for coords, dims, angle, color in shape_params:
         draw_shape(ax, *coords, *dims, angle, color)
-    for subset, (x, y) in LABEL_COORDS[n_sets].items():
-        draw_text(ax, x, y, labels.get(subset, ""), fontsize)
+    for subset, (x, y) in PETAL_LABEL_COORDS[n_sets].items():
+        draw_text(ax, x, y, petals.get(subset, ""), fontsize)
     if legend_loc is not None:
-        ax.legend(names, loc=legend_loc, prop={"size": fontsize})
+        ax.legend(labels, loc=legend_loc, prop={"size": fontsize})
     return figure, ax
