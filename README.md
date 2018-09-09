@@ -1,68 +1,24 @@
-# pyvenn
-2 ~ 6 Sets Venn Diagram For Python
+# pyvenn: Venn diagrams for 2, 3, 4, 5, 6 sets
 
-Use magic function in ipython notebook:
-```python
-%matplotlib inline
+This library is an evolution of tctianchi's pyvenn package
+(https://github.com/tctianchi/pyvenn).  
+Their liberal license (Unlicense) allowed me to fork the repository,
+modify the package's interface and, hopefully, significantly contribute to
+and improve the library, and make it installable from PyPI.
 
-import venn
-```
+The main methods in this version are different from the ones in tctianchi's
+implementation, but the original methods are still provided for backwards
+compatibility, and I would like to emphasize the importance of tctianchi's work
+that allowed for this library to exist (among other things, figuring out the
+coordinates best fit for plotting the diagrams' shapes).
 
-Or using non-interactive backend:
-```python
-import matplotlib
-matplotlib.use('Agg')
+This iteration of the library implements two main functions:
+* `venn(dataset_dict, **kwargs)` which plots true Venn diagrams for any number
+of sets between 2 and 5 using ellipses, and for 6 sets using triangles
+* `pseudovenn(dataset_dict, **kwargs)` which plots a Venn-like intersection of
+six circles (not all intersections are present in such a plot, but many are).
 
-import venn
-```
-
-Fetch labels of each subset in venn diagram. The input data is an array of iterable data(list, set, etc.). 
-```python
-In [5]: labels = venn.get_labels([
-            range(10),
-            range(5, 15)
-        ], fill=['number', 'logic'])
-In [6]: print labels
-Out [6]: {'01': '01: 5', '10': '10: 5', '11': '11: 5'}
-```
-
-Plot functions are based on the labels:
-```python
-fig, ax = venn.venn2(labels, names=['list 1', 'list 2'])
-fig.show()
-```
-
-![venn2](https://raw.githubusercontent.com/wiki/tctianchi/pyvenn/venn2.png)
-
-More examples:
-```python
-labels = venn.get_labels([range(10), range(5, 15), range(3, 8)], fill=['number', 'logic'])
-fig, ax = venn.venn3(labels, names=['list 1', 'list 2', 'list 3'])
-fig.show()
-```
-
-![venn3](https://raw.githubusercontent.com/wiki/tctianchi/pyvenn/venn3.png)
-
-```python
-labels = venn.get_labels([range(10), range(5, 15), range(3, 8), range(8, 17)], fill=['number', 'logic'])
-fig, ax = venn.venn4(labels, names=['list 1', 'list 2', 'list 3', 'list 4'])
-fig.show()
-```
-
-![venn4](https://raw.githubusercontent.com/wiki/tctianchi/pyvenn/venn4.png)
-
-```python
-labels = venn.get_labels([range(10), range(5, 15), range(3, 8), range(8, 17), range(10, 20)], fill=['number', 'logic'])
-fig, ax = venn.venn5(labels, names=['list 1', 'list 2', 'list 3', 'list 4', 'list 5'])
-fig.show()
-```
-
-![venn5](https://raw.githubusercontent.com/wiki/tctianchi/pyvenn/venn5.png)
-
-```python
-labels = venn.get_labels([range(10), range(5, 15), range(3, 8), range(8, 17), range(10, 20), range(13, 25)], fill=['number', 'logic'])
-fig, ax = venn.venn6(labels, names=['list 1', 'list 2', 'list 3', 'list 4', 'list 5', 'list 6'])
-fig.show()
-```
-
-![venn6](https://raw.githubusercontent.com/wiki/tctianchi/pyvenn/venn6.png)
+Please refer to the Jupyter notebook for demos and a brief explanation of the
+interface; a more complete documentation is in the works as the project keeps
+evolving:  
+https://github.com/LankyCyril/pyvenn/blob/master/pyvenn-demo.ipynb
