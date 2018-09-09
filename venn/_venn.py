@@ -3,8 +3,7 @@ from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from matplotlib.cm import ScalarMappable
 from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
-from ._constants import PETAL_LABEL_COORDS, AXES_KW
-from copy import copy
+from ._constants import PETAL_LABEL_COORDS
 
 def select_colors(n_colors=6, cmap="viridis", alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
@@ -77,20 +76,22 @@ def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
         )
     return petals
 
+def init_axes(ax, figsize):
+    """Create axes if do not exist, set axes parameters"""
+    if ax is None:
+        _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
+    ax.set(
+        aspect="equal", frame_on=False, xticks=[], yticks=[]
+    )
+    return ax
+
 def venn(*, petals, labels, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
     """Draw prepared petals with provided labels"""
     n_sets = len(labels)
     if n_sets != len(list(petals.keys())[0]):
         raise ValueError("Inconsistent petal and dataset labels")
     colors = select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha)
-    if ax is None:
-        figure, ax = subplots(
-            nrows=1, ncols=1, figsize=figsize,
-            subplot_kw=copy(AXES_KW) # copy() because this mutates passed dict
-        )
-    else:
-        figure = ax.figure
-        ax.set(**AXES_KW)
+    ax = init_axes(ax, figsize)
     if 2 <= n_sets < 6:
         draw_shape = draw_ellipse
     elif n_sets == 6:
@@ -106,4 +107,4 @@ def venn(*, petals, labels, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=1
         draw_text(ax, x, y, petals[logic], fontsize)
     if legend_loc is not None:
         ax.legend(labels, loc=legend_loc, prop={"size": fontsize})
-    return figure, ax
+    return ax.figure, ax
