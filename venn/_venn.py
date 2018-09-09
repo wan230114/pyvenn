@@ -67,7 +67,7 @@ def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
         ]
         petal_set = (
             (dataset_union & set.intersection(*included_sets)) -
-            set.union(*excluded_sets)
+            set.union(set(), *excluded_sets)
         )
         petals[logic] = fmt.format(
             logic=logic, size=len(petal_set),
