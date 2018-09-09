@@ -3,7 +3,8 @@ from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from matplotlib.cm import ScalarMappable
 from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
-from ._constants import PETAL_LABEL_COORDS
+from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS
+from math import pi, sin, cos
 
 def select_colors(n_colors=6, cmap="viridis", alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
@@ -80,16 +81,23 @@ def init_axes(ax, figsize):
     if ax is None:
         _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
     ax.set(
-        aspect="equal", frame_on=False, xticks=[], yticks=[]
+        aspect="equal", frame_on=False,
+        xlim=(-.05, 1.05), ylim=(-.05, 1.05),
+        xticks=[], yticks=[]
     )
     return ax
 
-def draw_venn(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend_loc, ax):
-    """Draw prepared petals with provided labels"""
+def get_n_sets(petal_labels, dataset_labels):
+    """Infer number of sets, check consistency"""
     n_sets = len(dataset_labels)
     for logic in petal_labels.keys():
         if len(logic) != n_sets:
             raise ValueError("Inconsistent petal and dataset labels")
+    return n_sets
+
+def draw_venn(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend_loc, ax):
+    """Draw true Venn diagram, annotate petals and dataset labels"""
+    n_sets = get_n_sets(petal_labels, dataset_labels)
     if 2 <= n_sets < 6:
         draw_shape = draw_ellipse
     elif n_sets == 6:
@@ -108,15 +116,50 @@ def draw_venn(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
 
-def venn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=14, legend_loc="upper right", ax=None):
-    """Check input, generate petal labels, draw venn diagram"""
+def draw_pseudovenn6(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend_loc, ax):
+    """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
+    n_sets = get_n_sets(petal_labels, dataset_labels)
+    if n_sets != 6:
+        raise NotImplementedError("Pseudovenn implemented only for 6 sets")
+    ax = init_axes(ax, figsize)
+    for step, color in zip(range(6), colors):
+        angle = (2 - step) * pi / 3
+        x = .5 + .2 * cos(angle)
+        y = .5 + .2 * sin(angle)
+        draw_ellipse(ax, x, y, .6, .6, 0, color)
+    for logic, petal_label in petal_labels.items():
+        # not all theoretical intersections are shown:
+        if logic in PSEUDOVENN_PETAL_COORDS[6]:
+            x, y = PSEUDOVENN_PETAL_COORDS[6][logic]
+            draw_text(ax, x, y, petal_labels[logic], fontsize=10)
+    if legend_loc is not None:
+        ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
+    return ax
+
+def check_dataset_dict(dataset_dict):
+    """Validate passed data (must be dictionary of sets)"""
     if not isinstance(dataset_dict, dict):
         raise TypeError("Only dictionaries of sets are understood")
     for dataset in dataset_dict.values():
         if not isinstance(dataset, set):
             raise TypeError("Only dictionaries of sets are understood")
+
+def venn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=14, legend_loc="upper right", ax=None):
+    """Check input, generate petal labels, draw venn diagram"""
+    check_dataset_dict(dataset_dict)
     n_sets = len(dataset_dict)
     return draw_venn(
+        petal_labels=generate_petal_labels(dataset_dict.values(), fmt),
+        dataset_labels=dataset_dict.keys(),
+        colors=select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
+        figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
+    )
+
+def pseudovenn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=14, legend_loc="upper right", ax=None):
+    """Check input, generate petal labels, draw pseudovenn diagram (does not include some combinations)"""
+    check_dataset_dict(dataset_dict)
+    n_sets = len(dataset_dict)
+    return draw_pseudovenn6(
         petal_labels=generate_petal_labels(dataset_dict.values(), fmt),
         dataset_labels=dataset_dict.keys(),
         colors=select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
