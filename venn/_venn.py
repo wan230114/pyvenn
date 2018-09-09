@@ -55,7 +55,6 @@ def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
     """Generate petal descriptions for venn diagram based on set sizes"""
     datasets = list(datasets)
     n_sets = len(datasets)
-    datasets = [set(datasets[i]) for i in range(n_sets)]
     dataset_union = set.union(*datasets)
     universe_size = len(dataset_union)
     petals = {}
@@ -88,16 +87,17 @@ def init_axes(ax, figsize):
 def venn(*, petals, labels, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
     """Draw prepared petals with provided labels"""
     n_sets = len(labels)
-    if n_sets != len(list(petals.keys())[0]):
-        raise ValueError("Inconsistent petal and dataset labels")
-    colors = select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha)
-    ax = init_axes(ax, figsize)
+    for logic in petals.keys():
+        if len(logic) != n_sets:
+            raise ValueError("Inconsistent petal and dataset labels")
     if 2 <= n_sets < 6:
         draw_shape = draw_ellipse
     elif n_sets == 6:
         draw_shape = draw_triangle
     else:
         raise ValueError("Number of sets must be between 2 and 6")
+    colors = select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha)
+    ax = init_axes(ax, figsize)
     shape_params = zip(
         SHAPE_COORDS[n_sets], SHAPE_DIMS[n_sets], SHAPE_ANGLES[n_sets], colors
     )
