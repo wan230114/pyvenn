@@ -4,8 +4,8 @@ from subprocess import Popen, PIPE
 from re import sub
 
 meta = Namespace(
-    __name__ = "pyvenn",
-    __version__ = "2018-09-09",
+    __name__ = "venn",
+    __version__ = "0.1",
     __author__ = "Kirill Grigorev",
     __git_id__ = "LankyCyril",
     __license__ = "GPLv3",
