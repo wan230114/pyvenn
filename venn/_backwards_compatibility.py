@@ -1,5 +1,5 @@
 from warnings import warn
-from ._venn import generate_petals, venn
+from ._venn import generate_petal_labels, venn
 from functools import partial
 
 def deprecation_warning(old_name, new_name):
@@ -15,7 +15,7 @@ def get_labels(data, fill=["number"]):
         fmt += "{size} "
     if "percent" in fill:
         fmt += "({percentage:.1f}%)"
-    return generate_petals(data, fmt)
+    return generate_petal_labels(data, fmt)
 
 def vennx(labels, names, *, n_sets, **options):
     deprecation_warning("venn{}".format(n_sets), "venn")
@@ -25,7 +25,7 @@ def vennx(labels, names, *, n_sets, **options):
     if "dpi" in options:
         warn("Option `dpi` is deprecated and has no effect")
         del options["dpi"]
-    return venn(petals=labels, labels=names, **options)
+    return venn(petal_labels=labels, dataset_labels=names, **options)
 
 venn2 = partial(vennx, names=["AB"], n_sets=2)
 venn3 = partial(vennx, names=["ABC"], n_sets=3)

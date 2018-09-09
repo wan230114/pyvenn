@@ -51,13 +51,13 @@ def generate_logics(n_sets):
     for i in range(1, 2**n_sets):
         yield bin(i)[2:].zfill(n_sets)
 
-def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
+def generate_petal_labels(datasets, fmt="{size} ({percentage:.1f}%)"):
     """Generate petal descriptions for venn diagram based on set sizes"""
     datasets = list(datasets)
     n_sets = len(datasets)
     dataset_union = set.union(*datasets)
     universe_size = len(dataset_union)
-    petals = {}
+    petal_labels = {}
     for logic in generate_logics(n_sets):
         included_sets = [
             datasets[i] for i in range(n_sets) if logic[i] == "1"
@@ -69,11 +69,11 @@ def generate_petals(datasets, fmt="{size} ({percentage:.1f}%)"):
             (dataset_union & set.intersection(*included_sets)) -
             set.union(set(), *excluded_sets)
         )
-        petals[logic] = fmt.format(
+        petal_labels[logic] = fmt.format(
             logic=logic, size=len(petal_set),
             percentage=(100*len(petal_set)/universe_size)
         )
-    return petals
+    return petal_labels
 
 def init_axes(ax, figsize):
     """Create axes if do not exist, set axes parameters"""
@@ -84,10 +84,10 @@ def init_axes(ax, figsize):
     )
     return ax
 
-def venn(*, petals, labels, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
+def venn(*, petal_labels, dataset_labels, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
     """Draw prepared petals with provided labels"""
-    n_sets = len(labels)
-    for logic in petals.keys():
+    n_sets = len(dataset_labels)
+    for logic in petal_labels.keys():
         if len(logic) != n_sets:
             raise ValueError("Inconsistent petal and dataset labels")
     if 2 <= n_sets < 6:
@@ -104,7 +104,7 @@ def venn(*, petals, labels, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=1
     for coords, dims, angle, color in shape_params:
         draw_shape(ax, *coords, *dims, angle, color)
     for logic, (x, y) in PETAL_LABEL_COORDS[n_sets].items():
-        draw_text(ax, x, y, petals[logic], fontsize)
+        draw_text(ax, x, y, petal_labels[logic], fontsize)
     if legend_loc is not None:
-        ax.legend(labels, loc=legend_loc, prop={"size": fontsize})
+        ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax.figure, ax
