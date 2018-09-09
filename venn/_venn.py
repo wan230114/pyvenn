@@ -84,7 +84,7 @@ def init_axes(ax, figsize):
     )
     return ax
 
-def draw_venn(*, petal_labels, dataset_labels, cmap, alpha, figsize, fontsize, legend_loc, ax):
+def draw_venn(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend_loc, ax):
     """Draw prepared petals with provided labels"""
     n_sets = len(dataset_labels)
     for logic in petal_labels.keys():
@@ -96,7 +96,6 @@ def draw_venn(*, petal_labels, dataset_labels, cmap, alpha, figsize, fontsize, l
         draw_shape = draw_triangle
     else:
         raise ValueError("Number of sets must be between 2 and 6")
-    colors = select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha)
     ax = init_axes(ax, figsize)
     shape_params = zip(
         SHAPE_COORDS[n_sets], SHAPE_DIMS[n_sets], SHAPE_ANGLES[n_sets], colors
@@ -109,16 +108,17 @@ def draw_venn(*, petal_labels, dataset_labels, cmap, alpha, figsize, fontsize, l
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
 
-def venn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
+def venn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=14, legend_loc="upper right", ax=None):
     """Check input, generate petal labels, draw venn diagram"""
     if not isinstance(dataset_dict, dict):
         raise TypeError("Only dictionaries of sets are understood")
     for dataset in dataset_dict.values():
         if not isinstance(dataset, set):
             raise TypeError("Only dictionaries of sets are understood")
+    n_sets = len(dataset_dict)
     return draw_venn(
         petal_labels=generate_petal_labels(dataset_dict.values(), fmt),
-        dataset_labels=dataset.keys(),
-        cmap=cmap, alpha=alpha, figsize=figsize, fontsize=fontsize,
-        legend_loc=legend_loc, ax=ax
+        dataset_labels=dataset_dict.keys(),
+        colors=select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
+        figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
     )
