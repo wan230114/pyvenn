@@ -51,7 +51,7 @@ def generate_logics(n_sets):
     for i in range(1, 2**n_sets):
         yield bin(i)[2:].zfill(n_sets)
 
-def generate_petal_labels(datasets, fmt="{size} ({percentage:.1f}%)"):
+def generate_petal_labels(datasets, fmt="{size}"):
     """Generate petal descriptions for venn diagram based on set sizes"""
     datasets = list(datasets)
     n_sets = len(datasets)
@@ -84,7 +84,7 @@ def init_axes(ax, figsize):
     )
     return ax
 
-def venn(*, petal_labels, dataset_labels, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
+def draw_venn(*, petal_labels, dataset_labels, cmap, alpha, figsize, fontsize, legend_loc, ax):
     """Draw prepared petals with provided labels"""
     n_sets = len(dataset_labels)
     for logic in petal_labels.keys():
@@ -107,4 +107,18 @@ def venn(*, petal_labels, dataset_labels, cmap="viridis", alpha=.4, figsize=(8, 
         draw_text(ax, x, y, petal_labels[logic], fontsize)
     if legend_loc is not None:
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
-    return ax.figure, ax
+    return ax
+
+def venn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
+    """Check input, generate petal labels, draw venn diagram"""
+    if not isinstance(dataset_dict, dict):
+        raise TypeError("Only dictionaries of sets are understood")
+    for dataset in dataset_dict.values():
+        if not isinstance(dataset, set):
+            raise TypeError("Only dictionaries of sets are understood")
+    return draw_venn(
+        petal_labels=generate_petal_labels(dataset_dict.values(), fmt),
+        dataset_labels=dataset.keys(),
+        cmap=cmap, alpha=alpha, figsize=figsize, fontsize=fontsize,
+        legend_loc=legend_loc, ax=ax
+    )
