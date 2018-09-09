@@ -3,14 +3,15 @@
 This library is an evolution of tctianchi's pyvenn package
 (https://github.com/tctianchi/pyvenn).  
 Their liberal license (Unlicense) allowed me to fork the repository,
-modify the package's interface and, hopefully, significantly contribute to
-and improve the library, and make it installable from PyPI.
+change the license to GPLv3, modify the package's interface and, hopefully,
+significantly contribute to and improve the library, and make it installable
+from PyPI.
 
 The main methods in this version are different from the ones in tctianchi's
 implementation, but the original methods are still provided for backwards
 compatibility, and I would like to emphasize the importance of tctianchi's work
 that allowed for this library to exist (among other things, figuring out the
-coordinates best fit for plotting the diagrams' shapes).
+coordinates best fit for plotting the diagrams' shapes and petals' labels).
 
 This iteration of the library implements two main functions:
 * `venn(dataset_dict, **kwargs)` which plots true Venn diagrams for any number
