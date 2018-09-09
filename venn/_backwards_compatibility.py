@@ -11,12 +11,11 @@ OLD_COLORS = [
     [.32, .32, .75, .20]
 ]
 
-def deprecation_warning(old_name, new_name):
-    mask = "`{}()` is retained for backwards compatibility; use `{}()` instead"
-    warn(mask.format(old_name, new_name))
-
 def get_labels(data, fill=["number"]):
-    deprecation_warning("get_labels", "generate_petals")
+    warn((
+        "`get_labels()` is retained for backwards compatibility; " +
+        "use `generate_petal_labels()` or the higher level `venn()` instead"
+    ))
     fmt = ""
     if "logic" in fill:
         fmt += "{logic}: "
@@ -28,7 +27,10 @@ def get_labels(data, fill=["number"]):
 
 def vennx(labels, names, colors=OLD_COLORS, figsize=(9, 9), dpi=None, fontsize=14):
     n_sets = len(names)
-    deprecation_warning("venn{}".format(n_sets), "venn")
+    warn((
+        "`venn{}()` is retained for backwards compatibility; ".format(n_sets) +
+        "use `venn()` instead"
+    ))
     if dpi is not None:
         warn("Option `dpi` is deprecated and has no effect")
     ax = draw_venn(
