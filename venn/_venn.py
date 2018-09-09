@@ -131,7 +131,7 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, colors, figsize, fontsize,
         # not all theoretical intersections are shown:
         if logic in PSEUDOVENN_PETAL_COORDS[6]:
             x, y = PSEUDOVENN_PETAL_COORDS[6][logic]
-            draw_text(ax, x, y, petal_labels[logic], fontsize=10)
+            draw_text(ax, x, y, petal_labels[logic], fontsize=fontsize)
     if legend_loc is not None:
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
@@ -144,7 +144,7 @@ def check_dataset_dict(dataset_dict):
         if not isinstance(dataset, set):
             raise TypeError("Only dictionaries of sets are understood")
 
-def venn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=14, legend_loc="upper right", ax=None):
+def venn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
     """Check input, generate petal labels, draw venn diagram"""
     check_dataset_dict(dataset_dict)
     n_sets = len(dataset_dict)
@@ -155,7 +155,7 @@ def venn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), f
         figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
     )
 
-def pseudovenn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=14, legend_loc="upper right", ax=None):
+def pseudovenn(dataset_dict, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
     """Check input, generate petal labels, draw pseudovenn diagram (does not include some combinations)"""
     check_dataset_dict(dataset_dict)
     n_sets = len(dataset_dict)
