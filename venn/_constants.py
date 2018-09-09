@@ -1,4 +1,4 @@
-VENN_AXIS_KW = {
+AXES_KW = {
     "aspect": "equal", "frame_on": False,
     "xticks": [], "yticks": []
 }
