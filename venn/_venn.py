@@ -7,7 +7,7 @@ from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS
 from math import pi, sin, cos
 from functools import partial
 
-def select_colors(n_colors=6, cmap="viridis", alpha=.4):
+def generate_colors(n_colors=6, cmap="viridis", alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
     if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
         raise ValueError("n_colors must be an integer between 2 and 6")
@@ -15,7 +15,7 @@ def select_colors(n_colors=6, cmap="viridis", alpha=.4):
         colors = [to_rgba(color, alpha=alpha) for color in cmap]
     else:
         scalar_mappable = ScalarMappable(cmap=cmap)
-        colors = scalar_mappable.to_rgba(range(n_colors), alpha=alpha)
+        colors = scalar_mappable.to_rgba(range(n_colors), alpha=alpha).tolist()
     return colors[:n_colors]
 
 def less_transparent_color(color, alpha_factor=2):
@@ -94,6 +94,8 @@ def get_n_sets(petal_labels, dataset_labels):
     for logic in petal_labels.keys():
         if len(logic) != n_sets:
             raise ValueError("Inconsistent petal and dataset labels")
+        if not (set(logic) <= {"0", "1"}):
+            raise KeyError("Key not understood: " + logic)
     return n_sets
 
 def draw_venn(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend_loc, ax):
@@ -111,8 +113,11 @@ def draw_venn(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend
     )
     for coords, dims, angle, color in shape_params:
         draw_shape(ax, *coords, *dims, angle, color)
-    for logic, (x, y) in PETAL_LABEL_COORDS[n_sets].items():
-        draw_text(ax, x, y, petal_labels[logic], fontsize)
+    for logic, petal_label in petal_labels.items():
+        # some petals could have been modified manually:
+        if logic in PETAL_LABEL_COORDS[n_sets]:
+            x, y = PETAL_LABEL_COORDS[n_sets][logic]
+            draw_text(ax, x, y, petal_label, fontsize=fontsize)
     if legend_loc is not None:
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
@@ -129,10 +134,10 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, colors, figsize, fontsize,
         y = .5 + .2 * sin(angle)
         draw_ellipse(ax, x, y, .6, .6, 0, color)
     for logic, petal_label in petal_labels.items():
-        # not all theoretical intersections are shown:
+        # not all theoretical intersections are shown, and petals could have been modified manually:
         if logic in PSEUDOVENN_PETAL_COORDS[6]:
             x, y = PSEUDOVENN_PETAL_COORDS[6][logic]
-            draw_text(ax, x, y, petal_labels[logic], fontsize=fontsize)
+            draw_text(ax, x, y, petal_label, fontsize=fontsize)
     if legend_loc is not None:
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
@@ -155,7 +160,7 @@ def venn_dispatch(dataset_dict, draw_func, fmt="{size}", cmap="viridis", alpha=.
     return draw_func(
         petal_labels=generate_petal_labels(dataset_dict.values(), fmt),
         dataset_labels=dataset_dict.keys(),
-        colors=select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
+        colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
         figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
     )
 
