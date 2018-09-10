@@ -7,7 +7,7 @@ from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS
 from math import pi, sin, cos
 from functools import partial
 
-def select_colors(n_colors=6, cmap="viridis", alpha=.4):
+def generate_colors(n_colors=6, cmap="viridis", alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
     if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
         raise ValueError("n_colors must be an integer between 2 and 6")
@@ -15,7 +15,7 @@ def select_colors(n_colors=6, cmap="viridis", alpha=.4):
         colors = [to_rgba(color, alpha=alpha) for color in cmap]
     else:
         scalar_mappable = ScalarMappable(cmap=cmap)
-        colors = scalar_mappable.to_rgba(range(n_colors), alpha=alpha)
+        colors = scalar_mappable.to_rgba(range(n_colors), alpha=alpha).tolist()
     return colors[:n_colors]
 
 def less_transparent_color(color, alpha_factor=2):
@@ -155,7 +155,7 @@ def venn_dispatch(dataset_dict, draw_func, fmt="{size}", cmap="viridis", alpha=.
     return draw_func(
         petal_labels=generate_petal_labels(dataset_dict.values(), fmt),
         dataset_labels=dataset_dict.keys(),
-        colors=select_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
+        colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
         figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
     )
 
