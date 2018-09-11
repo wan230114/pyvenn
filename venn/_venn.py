@@ -142,27 +142,27 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, colors, figsize, fontsize,
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
 
-def is_valid_dataset_dict(dataset_dict):
+def is_valid_dataset_dict(data):
     """Validate passed data (must be dictionary of sets)"""
-    if not (hasattr(dataset_dict, "keys") and hasattr(dataset_dict, "values")):
+    if not (hasattr(data, "keys") and hasattr(data, "values")):
         return False
-    for dataset in dataset_dict.values():
+    for dataset in data.values():
         if not isinstance(dataset, set):
             return False
     else:
         return True
 
-def venn_dispatch(dataset_dict, draw_func, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
+def venn_dispatch(data, func, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
     """Check input, generate petal labels, draw venn or pseudovenn diagram"""
-    if not is_valid_dataset_dict(dataset_dict):
+    if not is_valid_dataset_dict(data):
         raise TypeError("Only dictionaries of sets are understood")
-    n_sets = len(dataset_dict)
-    return draw_func(
-        petal_labels=generate_petal_labels(dataset_dict.values(), fmt),
-        dataset_labels=dataset_dict.keys(),
+    n_sets = len(data)
+    return func(
+        petal_labels=generate_petal_labels(data.values(), fmt),
+        dataset_labels=data.keys(),
         colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
         figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
     )
 
-venn = partial(venn_dispatch, draw_func=draw_venn)
-pseudovenn = partial(venn_dispatch, draw_func=draw_pseudovenn6)
+venn = partial(venn_dispatch, func=draw_venn)
+pseudovenn = partial(venn_dispatch, func=draw_pseudovenn6)
