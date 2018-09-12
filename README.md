@@ -1,7 +1,11 @@
 # pyvenn: Venn diagrams for 2, 3, 4, 5, 6 sets
 
-This library is an evolution of tctianchi's pyvenn package
-(https://github.com/tctianchi/pyvenn).  
+Please refer to the Jupyter notebook for demos and a brief explanation of the
+interface; a more complete documentation is in the works as the project keeps
+evolving:  
+https://github.com/LankyCyril/pyvenn/blob/master/pyvenn-demo.ipynb
+
+This library is an evolution of tctianchi's pyvenn package (see fork URL).  
 Their liberal license (Unlicense) allowed me to fork the repository,
 change the license to GPLv3, modify the package's interface and, hopefully,
 significantly contribute to and improve the library, and make it installable
@@ -18,8 +22,3 @@ This iteration of the library implements two main functions:
 of sets between 2 and 5 using ellipses, and for 6 sets using triangles
 * `pseudovenn(dataset_dict, **kwargs)` which plots a Venn-like intersection of
 six circles (not all intersections are present in such a plot, but many are).
-
-Please refer to the Jupyter notebook for demos and a brief explanation of the
-interface; a more complete documentation is in the works as the project keeps
-evolving:  
-https://github.com/LankyCyril/pyvenn/blob/master/pyvenn-demo.ipynb
