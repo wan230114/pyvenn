@@ -7,7 +7,7 @@ from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS
 from math import pi, sin, cos
 from functools import partial
 
-def generate_colors(n_colors=6, cmap="viridis", alpha=.4):
+def generate_colors(cmap="viridis", n_colors=6, alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
     if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
         raise ValueError("n_colors must be an integer between 2 and 6")
@@ -98,7 +98,7 @@ def get_n_sets(petal_labels, dataset_labels):
             raise KeyError("Key not understood: " + logic)
     return n_sets
 
-def draw_venn(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend_loc, ax):
+def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax):
     """Draw true Venn diagram, annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if 2 <= n_sets < 6:
@@ -122,7 +122,23 @@ def draw_venn(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
 
-def draw_pseudovenn6(*, petal_labels, dataset_labels, colors, figsize, fontsize, legend_loc, ax):
+def update_hidden(hidden, logic, petal_labels):
+    """Increment set's hidden count (sizes of intersections that are not displayed)"""
+    for i, c in enumerate(logic):
+        if c == "1":
+            hidden[i] += int(petal_labels[logic])
+    return hidden
+
+def draw_hint_explanation(ax, dataset_labels, fontsize):
+    """Add explanation of 'n/d*' hints"""
+    example_labels = list(dataset_labels)[0], list(dataset_labels)[3]
+    hint_text = (
+        "* elements of set in intersections that are not displayed,\n" +
+        "such as shared only between {} and {}".format(*example_labels)
+    )
+    draw_text(ax, .5, -.1, hint_text, fontsize)
+
+def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax):
     """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if n_sets != 6:
@@ -133,36 +149,51 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, colors, figsize, fontsize,
         x = .5 + .2 * cos(angle)
         y = .5 + .2 * sin(angle)
         draw_ellipse(ax, x, y, .6, .6, 0, color)
+    if hint_hidden:
+        hidden = [0] * n_sets
     for logic, petal_label in petal_labels.items():
         # not all theoretical intersections are shown, and petals could have been modified manually:
         if logic in PSEUDOVENN_PETAL_COORDS[6]:
             x, y = PSEUDOVENN_PETAL_COORDS[6][logic]
-            draw_text(ax, x, y, petal_label, fontsize=fontsize)
+            draw_text(ax, x, y, petal_label, fontsize)
+        elif hint_hidden:
+            hidden = update_hidden(hidden, logic, petal_labels)
+    if hint_hidden:
+        for step, hidden_value in zip(range(6), hidden):
+            angle = (2 - step) * pi / 3
+            x = .5 + .57 * cos(angle)
+            y = .5 + .57 * sin(angle)
+            draw_text(ax, x, y, "{}\n n/d*".format(hidden_value), fontsize)
+        ax.set(xlim=(-.2, 1.05))
+        draw_hint_explanation(ax, dataset_labels, fontsize)
     if legend_loc is not None:
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
 
-def is_valid_dataset_dict(dataset_dict):
+def is_valid_dataset_dict(data):
     """Validate passed data (must be dictionary of sets)"""
-    if not (hasattr(dataset_dict, "keys") and hasattr(dataset_dict, "values")):
+    if not (hasattr(data, "keys") and hasattr(data, "values")):
         return False
-    for dataset in dataset_dict.values():
+    for dataset in data.values():
         if not isinstance(dataset, set):
             return False
     else:
         return True
 
-def venn_dispatch(dataset_dict, draw_func, fmt="{size}", cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
+def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
     """Check input, generate petal labels, draw venn or pseudovenn diagram"""
-    if not is_valid_dataset_dict(dataset_dict):
+    if not is_valid_dataset_dict(data):
         raise TypeError("Only dictionaries of sets are understood")
-    n_sets = len(dataset_dict)
-    return draw_func(
-        petal_labels=generate_petal_labels(dataset_dict.values(), fmt),
-        dataset_labels=dataset_dict.keys(),
+    if hint_hidden and (func == draw_pseudovenn6) and (fmt != "{size}"):
+        error_message = "To use fmt='{}', set hint_hidden=False".format(fmt)
+        raise NotImplementedError(error_message)
+    n_sets = len(data)
+    return func(
+        petal_labels=generate_petal_labels(data.values(), fmt),
+        dataset_labels=data.keys(), hint_hidden=hint_hidden,
         colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
         figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
     )
 
-venn = partial(venn_dispatch, draw_func=draw_venn)
-pseudovenn = partial(venn_dispatch, draw_func=draw_pseudovenn6)
+venn = partial(venn_dispatch, func=draw_venn, hint_hidden=False)
+pseudovenn = partial(venn_dispatch, func=draw_pseudovenn6, hint_hidden=True)
