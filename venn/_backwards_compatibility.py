@@ -34,7 +34,7 @@ def vennx(labels, names, colors=OLD_COLORS, figsize=(9, 9), dpi=None, fontsize=1
     if dpi is not None:
         warn("Option `dpi` is deprecated and has no effect")
     ax = draw_venn(
-        petal_labels=labels, dataset_labels=names,
+        petal_labels=labels, dataset_labels=names, hint_hidden=False,
         colors=colors, figsize=figsize, fontsize=fontsize,
         legend_loc="best", ax=None
     )
