@@ -7,7 +7,7 @@ from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS
 from math import pi, sin, cos
 from functools import partial
 
-def generate_colors(n_colors=6, cmap="viridis", alpha=.4):
+def generate_colors(cmap="viridis", n_colors=6, alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
     if not isinstance(n_colors, int) or (n_colors < 2) or (n_colors > 6):
         raise ValueError("n_colors must be an integer between 2 and 6")
