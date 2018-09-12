@@ -11,19 +11,6 @@ meta = Namespace(
     __license__ = "GPLv3",
 )
 
-def get_remote():
-    cmd = ["git", "remote", "-v", "show", "origin"]
-    git = Popen(cmd, stdout=PIPE, universal_newlines=True)
-    stdout = git.communicate()[0]
-    try:
-        fetch = stdout.split("\n")[1]
-    except IndexError:
-        return ""
-    raw_remote = fetch.split("Fetch URL: ")[1]
-    pattern = "(://){}@".format(meta.__git_id__)
-    remote = sub(pattern, r"\1", raw_remote)
-    return remote
-
 def get_readme(filename):
     with open(filename) as readme_handle:
         return readme_handle.read()
@@ -33,7 +20,7 @@ if __name__ == "__main__":
         name = meta.__name__,
         version = meta.__version__,
         packages = [meta.__name__],
-        url = get_remote(),
+        url = "https://pypi.org/project/venn/",
         author = meta.__author__,
         license = meta.__license__,
         zip_safe = True,
