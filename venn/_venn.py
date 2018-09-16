@@ -195,4 +195,6 @@ def venn_dispatch(
     )
 
 venn = partial(venn_dispatch, func=draw_venn, hint_hidden=False)
+venn.__doc__ = "Check input, generate petal labels, draw venn diagram"
 pseudovenn = partial(venn_dispatch, func=draw_pseudovenn6, hint_hidden=True)
+pseudovenn.__doc__ = "Check input, generate petal labels, draw pseudovenn diagram"
