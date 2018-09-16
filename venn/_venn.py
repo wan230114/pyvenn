@@ -6,6 +6,7 @@ from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS, CENTER_TEXT
 from math import pi, sin, cos
 from functools import partial
+from warnings import warn
 
 def generate_colors(cmap="viridis", n_colors=6, alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
@@ -176,19 +177,26 @@ def is_valid_dataset_dict(data):
 
 def venn_dispatch(
         data, func,
-        fmt="{size}", hint_hidden=False, fontsize=13,
+        petal_labels=None, fmt=None, hint_hidden=False, fontsize=13,
         cmap="viridis", alpha=.4,
         figsize=(8, 8), legend_loc="upper right", ax=None
     ):
     """Check input, generate petal labels, draw venn or pseudovenn diagram"""
     if not is_valid_dataset_dict(data):
         raise TypeError("Only dictionaries of sets are understood")
-    if hint_hidden and (func == draw_pseudovenn6) and (fmt != "{size}"):
-        error_message = "To use fmt='{}', set hint_hidden=False".format(fmt)
-        raise NotImplementedError(error_message)
+    if hint_hidden and (func == draw_pseudovenn6):
+        if fmt not in {None, "{size}"}:
+            error_message = "To use fmt='{}', set hint_hidden=False".format(fmt)
+            raise NotImplementedError(error_message)
     n_sets = len(data)
+    if petal_labels is None:
+        if fmt is None:
+            fmt = "{size}"
+        petal_labels=generate_petal_labels(data.values(), fmt)
+    elif fmt is not None:
+        warn("Passing `fmt` with `petal_labels` will have no effect")
     return func(
-        petal_labels=generate_petal_labels(data.values(), fmt),
+        petal_labels=petal_labels,
         dataset_labels=data.keys(), hint_hidden=hint_hidden,
         colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
         figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
