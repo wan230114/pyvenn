@@ -174,7 +174,12 @@ def is_valid_dataset_dict(data):
     else:
         return True
 
-def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
+def venn_dispatch(
+        data, func,
+        fmt="{size}", hint_hidden=False, fontsize=13,
+        cmap="viridis", alpha=.4,
+        figsize=(8, 8), legend_loc="upper right", ax=None
+    ):
     """Check input, generate petal labels, draw venn or pseudovenn diagram"""
     if not is_valid_dataset_dict(data):
         raise TypeError("Only dictionaries of sets are understood")
