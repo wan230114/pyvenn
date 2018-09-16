@@ -23,8 +23,8 @@ def less_transparent_color(color, alpha_factor=2):
     new_alpha = (1 + to_rgba(color)[3]) / alpha_factor
     return to_rgba(color, alpha=new_alpha)
 
-def draw_ellipse(ax, x, y, w, h, a, color):
-    """Wrapper for drawing ellipse; called like `draw_ellipse(ax, *coords, *dims, angle, color)`"""
+def draw_ellipse(x, y, w, h, a, color, ax):
+    """Wrapper for drawing ellipse; called like `draw_ellipse(*coords, *dims, angle, color, ax)`"""
     ax.add_patch(
         Ellipse(
             xy=(x,y), width=w, height=h, angle=a,
@@ -32,8 +32,8 @@ def draw_ellipse(ax, x, y, w, h, a, color):
         )
     )
 
-def draw_triangle(ax, x1, y1, x2, y2, x3, y3, _dim, _angle, color):
-    """Wrapper for drawing triangle; called like `draw_triangle(ax, *coords, None, None, color)`"""
+def draw_triangle(x1, y1, x2, y2, x3, y3, _dim, _angle, color, ax):
+    """Wrapper for drawing triangle; called like `draw_triangle(*coords, None, None, color, ax)`"""
     ax.add_patch(
         Polygon(
             xy=[(x1, y1), (x2, y2), (x3, y3)], closed=True,
@@ -105,7 +105,7 @@ def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fon
         SHAPE_COORDS[n_sets], SHAPE_DIMS[n_sets], SHAPE_ANGLES[n_sets], colors
     )
     for coords, dims, angle, color in shape_params:
-        draw_shape(ax, *coords, *dims, angle, color)
+        draw_shape(*coords, *dims, angle, color, ax)
     for logic, petal_label in petal_labels.items():
         # some petals could have been modified manually:
         if logic in PETAL_LABEL_COORDS[n_sets]:
@@ -141,7 +141,7 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsi
         angle = (2 - step) * pi / 3
         x = .5 + .2 * cos(angle)
         y = .5 + .2 * sin(angle)
-        draw_ellipse(ax, x, y, .6, .6, 0, color)
+        draw_ellipse(x, y, .6, .6, 0, color, ax)
     if hint_hidden:
         hidden = [0] * n_sets
     for logic, petal_label in petal_labels.items():
