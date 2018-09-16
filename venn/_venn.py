@@ -3,7 +3,7 @@ from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from matplotlib.cm import ScalarMappable
 from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
-from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS
+from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS, CENTER_TEXT
 from math import pi, sin, cos
 from functools import partial
 
@@ -39,13 +39,6 @@ def draw_triangle(ax, x1, y1, x2, y2, x3, y3, _dim, _angle, color):
             xy=[(x1, y1), (x2, y2), (x3, y3)], closed=True,
             facecolor=color, edgecolor=less_transparent_color(color)
         )
-    )
-
-def draw_text(ax, x, y, text, fontsize, color="black"):
-    """Wrapper for drawing text"""
-    ax.text(
-        x, y, text, fontsize=fontsize, color=color,
-        horizontalalignment="center", verticalalignment="center"
     )
 
 def generate_logics(n_sets):
@@ -117,7 +110,7 @@ def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fon
         # some petals could have been modified manually:
         if logic in PETAL_LABEL_COORDS[n_sets]:
             x, y = PETAL_LABEL_COORDS[n_sets][logic]
-            draw_text(ax, x, y, petal_label, fontsize=fontsize)
+            ax.text(x, y, petal_label, fontsize=fontsize, **CENTER_TEXT)
     if legend_loc is not None:
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
@@ -136,7 +129,7 @@ def draw_hint_explanation(ax, dataset_labels, fontsize):
         "* elements of set in intersections that are not displayed,\n" +
         "such as shared only between {} and {}".format(*example_labels)
     )
-    draw_text(ax, .5, -.1, hint_text, fontsize)
+    ax.text(.5, -.1, hint_text, fontsize=fontsize, **CENTER_TEXT)
 
 def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax):
     """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
@@ -155,7 +148,7 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsi
         # not all theoretical intersections are shown, and petals could have been modified manually:
         if logic in PSEUDOVENN_PETAL_COORDS[6]:
             x, y = PSEUDOVENN_PETAL_COORDS[6][logic]
-            draw_text(ax, x, y, petal_label, fontsize)
+            ax.text(x, y, petal_label, fontsize=fontsize, **CENTER_TEXT)
         elif hint_hidden:
             hidden = update_hidden(hidden, logic, petal_labels)
     if hint_hidden:
@@ -163,7 +156,8 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsi
             angle = (2 - step) * pi / 3
             x = .5 + .57 * cos(angle)
             y = .5 + .57 * sin(angle)
-            draw_text(ax, x, y, "{}\n n/d*".format(hidden_value), fontsize)
+            hint = "{}\n n/d*".format(hidden_value)
+            ax.text(x, y, hint, fontsize=fontsize, **CENTER_TEXT)
         ax.set(xlim=(-.2, 1.05))
         draw_hint_explanation(ax, dataset_labels, fontsize)
     if legend_loc is not None:

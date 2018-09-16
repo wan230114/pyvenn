@@ -1,3 +1,6 @@
+CENTER_TEXT = dict(horizontalalignment="center", verticalalignment="center")
+RALIGN_TEXT = dict(horizontalalignment="right", verticalalignment="center")
+
 SHAPE_COORDS = {
     2: [(.375, .500), (.625, .500)],
     3: [(.333, .633), (.666, .633), (.500, .310)],
