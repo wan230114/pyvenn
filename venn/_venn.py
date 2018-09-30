@@ -194,11 +194,11 @@ def venn_dispatch(
     elif fmt is not None:
         warn("Passing `fmt` with `petal_labels` will have no effect")
     ax = init_axes(ax, figsize)
+    colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha)
     return func(
-        petal_labels=petal_labels,
-        dataset_labels=data.keys(), hint_hidden=hint_hidden,
-        colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
-        fontsize=fontsize, legend_loc=legend_loc, ax=ax
+        petal_labels=petal_labels, dataset_labels=data.keys(),
+        colors=colors, fontsize=fontsize, hint_hidden=hint_hidden,
+        legend_loc=legend_loc, ax=ax
     )
 
 venn = partial(venn_dispatch, func=draw_venn, hint_hidden=False)
