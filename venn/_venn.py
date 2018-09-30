@@ -71,17 +71,6 @@ def generate_petal_labels(datasets, fmt="{size}"):
         )
     return petal_labels
 
-def init_axes(ax, figsize):
-    """Create axes if do not exist, set axes parameters"""
-    if ax is None:
-        _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
-    ax.set(
-        aspect="equal", frame_on=False,
-        xlim=(-.05, 1.05), ylim=(-.05, 1.05),
-        xticks=[], yticks=[]
-    )
-    return ax
-
 def get_n_sets(petal_labels, dataset_labels):
     """Infer number of sets, check consistency"""
     n_sets = len(dataset_labels)
@@ -92,7 +81,7 @@ def get_n_sets(petal_labels, dataset_labels):
             raise KeyError("Key not understood: " + logic)
     return n_sets
 
-def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax):
+def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw true Venn diagram, annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if 2 <= n_sets < 6:
@@ -101,7 +90,6 @@ def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fon
         draw_shape = draw_triangle
     else:
         raise ValueError("Number of sets must be between 2 and 6")
-    ax = init_axes(ax, figsize)
     shape_params = zip(
         SHAPE_COORDS[n_sets], SHAPE_DIMS[n_sets], SHAPE_ANGLES[n_sets], colors
     )
@@ -132,12 +120,11 @@ def draw_hint_explanation(ax, dataset_labels, fontsize):
     )
     ax.text(.5, -.1, hint_text, fontsize=fontsize, **CENTER_TEXT)
 
-def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax):
+def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if n_sets != 6:
         raise NotImplementedError("Pseudovenn implemented only for 6 sets")
-    ax = init_axes(ax, figsize)
     for step, color in zip(range(6), colors):
         angle = (2 - step) * pi / 3
         x = .5 + .2 * cos(angle)
@@ -175,6 +162,17 @@ def is_valid_dataset_dict(data):
     else:
         return True
 
+def init_axes(ax, figsize):
+    """Create axes if do not exist, set axes parameters"""
+    if ax is None:
+        _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
+    ax.set(
+        aspect="equal", frame_on=False,
+        xlim=(-.05, 1.05), ylim=(-.05, 1.05),
+        xticks=[], yticks=[]
+    )
+    return ax
+
 def venn_dispatch(
         data, func,
         petal_labels=None, fmt=None, hint_hidden=False, fontsize=13,
@@ -195,11 +193,12 @@ def venn_dispatch(
         petal_labels=generate_petal_labels(data.values(), fmt)
     elif fmt is not None:
         warn("Passing `fmt` with `petal_labels` will have no effect")
+    ax = init_axes(ax, figsize)
     return func(
         petal_labels=petal_labels,
         dataset_labels=data.keys(), hint_hidden=hint_hidden,
         colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
-        figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
+        fontsize=fontsize, legend_loc=legend_loc, ax=ax
     )
 
 venn = partial(venn_dispatch, func=draw_venn, hint_hidden=False)
