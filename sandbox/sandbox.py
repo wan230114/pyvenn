@@ -5,7 +5,9 @@ from matplotlib.pyplot import switch_backend
 from venn import venn
 
 
-def main(datasets, image_file):
+def main(datasets, image_file, n=2):
+    for _, k in zip(range(n, len(datasets)), datasets.keys()):
+        del datasets[k]
     switch_backend("Agg")
     ax = venn(datasets)
     ax.figure.savefig(image_file, bbox_inches="tight")
