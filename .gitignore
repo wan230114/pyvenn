@@ -58,6 +58,10 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+# Jupyter Notebook
 .ipynb_checkpoints
 pyvenn-sandbox.ipynb
+
+# Sandbox
+sandbox/*.png
+sandbox/*.pdf
