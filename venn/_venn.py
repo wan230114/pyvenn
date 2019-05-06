@@ -73,7 +73,7 @@ def generate_petal_labels(datasets, fmt="{size}"):
         )
         petal_labels[logic] = fmt.format(
             logic=logic, size=len(petal_set),
-            percentage=(100*len(petal_set)/universe_size)
+            percentage=(100*len(petal_set)/max(universe_size, 1))
         )
     return petal_labels
 
