@@ -162,14 +162,14 @@ def is_valid_dataset_dict(data):
     else:
         return True
 
-def init_axes(ax, figsize):
+def init_axes(ax):
     """Create axes if do not exist, set axes parameters"""
     if ax is None:
-        _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
+        _, ax = subplots(nrows=1, ncols=1)
     ax.set(
         aspect="equal", frame_on=False,
         xlim=(-.05, 1.05), ylim=(-.05, 1.05),
-        xticks=[], yticks=[]
+        xticks=[], yticks=[],
     )
     return ax
 
@@ -177,7 +177,7 @@ def venn_dispatch(
         data, func,
         petal_labels=None, fmt=None, hint_hidden=False, fontsize=13,
         cmap="viridis", alpha=.4,
-        figsize=(8, 8), legend_loc="upper right", ax=None
+        legend_loc="upper right", ax=None
     ):
     """Check input, generate petal labels, draw venn or pseudovenn diagram"""
     if not is_valid_dataset_dict(data):
@@ -193,7 +193,7 @@ def venn_dispatch(
         petal_labels=generate_petal_labels(data.values(), fmt)
     elif fmt is not None:
         warn("Passing `fmt` with `petal_labels` will have no effect")
-    ax = init_axes(ax, figsize)
+    ax = init_axes(ax)
     colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha)
     return func(
         petal_labels=petal_labels, dataset_labels=data.keys(),
@@ -203,21 +203,20 @@ def venn_dispatch(
 
 
 @validate_arguments()
-def venn(data, petal_labels=None, fmt=None, hint_hidden=False, fontsize=13, cmap="viridis", alpha=.4, figsize=(8, 8), legend_loc="upper right", ax=None):
+def venn(data, *, petal_labels=None, fmt=None, hint_hidden=False, fontsize=13, cmap="viridis", alpha=.4, legend_loc="upper right", ax=None):
     """Check input, generate petal labels, draw venn diagram"""
     return venn_dispatch(
         data, func=draw_venn,
         petal_labels=petal_labels, fmt=fmt, hint_hidden=hint_hidden,
-        fontsize=fontsize, cmap=cmap, alpha=alpha, figsize=figsize,
-        legend_loc=legend_loc, ax=ax,
+        fontsize=fontsize, cmap=cmap, alpha=alpha, legend_loc=legend_loc, ax=ax,
     )
 
 
-def pseudovenn(data, petal_labels=None, fmt=None, hint_hidden=True, fontsize=13, cmap="viridis", alpha=.4, figsize=(8, 8), legend_loc="upper right", ax=None):
+def pseudovenn(data, *, petal_labels=None, fmt=None, hint_hidden=True, fontsize=13, cmap="viridis", alpha=.4, legend_loc="upper right", ax=None):
     """Check input, generate petal labels, draw pseudovenn diagram"""
     return venn_dispatch(
         data, func=draw_pseudovenn6,
         petal_labels=petal_labels, fmt=fmt, hint_hidden=hint_hidden,
-        fontsize=fontsize, cmap=cmap, alpha=alpha, figsize=figsize,
+        fontsize=fontsize, cmap=cmap, alpha=alpha,
         legend_loc=legend_loc, ax=ax,
     )
