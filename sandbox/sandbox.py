@@ -21,5 +21,5 @@ if __name__ == "__main__":
     outdir = path.dirname(__file__)
     with open(path.join(outdir, "test-data.pkl"), mode="rb") as pkl:
         datasets = load(pkl)
-    returncode = main(datasets, path.join(outdir, "test-data.png"))
+    returncode = main(datasets, path.join(outdir, "test-data.pdf"))
     exit(returncode)
