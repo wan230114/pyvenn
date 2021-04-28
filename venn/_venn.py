@@ -5,8 +5,8 @@ from matplotlib.cm import ScalarMappable
 from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS, CENTER_TEXT
 from math import pi, sin, cos
-from warnings import warn
 from ._utils import validate_arguments
+
 
 def generate_colors(cmap="viridis", n_colors=6, alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
@@ -19,33 +19,34 @@ def generate_colors(cmap="viridis", n_colors=6, alpha=.4):
         colors = scalar_mappable.to_rgba(range(n_colors), alpha=alpha).tolist()
     return colors[:n_colors]
 
+
 def less_transparent_color(color, alpha_factor=2):
     """Bump up color's alpha"""
     new_alpha = (1 + to_rgba(color)[3]) / alpha_factor
     return to_rgba(color, alpha=new_alpha)
 
+
 def draw_ellipse(x, y, w, h, a, color, ax):
     """Wrapper for drawing ellipse; called like `draw_ellipse(*coords, *dims, angle, color, ax)`"""
-    ax.add_patch(
-        Ellipse(
-            xy=(x,y), width=w, height=h, angle=a,
-            facecolor=color, edgecolor=less_transparent_color(color)
-        )
-    )
+    ax.add_patch(Ellipse(
+        xy=(x,y), width=w, height=h, angle=a,
+        facecolor=color, edgecolor=less_transparent_color(color),
+    ))
+
 
 def draw_triangle(x1, y1, x2, y2, x3, y3, _dim, _angle, color, ax):
     """Wrapper for drawing triangle; called like `draw_triangle(*coords, None, None, color, ax)`"""
-    ax.add_patch(
-        Polygon(
-            xy=[(x1, y1), (x2, y2), (x3, y3)], closed=True,
-            facecolor=color, edgecolor=less_transparent_color(color)
-        )
-    )
+    ax.add_patch(Polygon(
+        xy=[(x1, y1), (x2, y2), (x3, y3)], closed=True,
+        facecolor=color, edgecolor=less_transparent_color(color),
+    ))
+
 
 def generate_logics(n_sets):
     """Generate intersection identifiers in binary (0010 etc)"""
     for i in range(1, 2**n_sets):
         yield bin(i)[2:].zfill(n_sets)
+
 
 def generate_petal_labels(datasets, fmt="{size}"):
     """Generate petal descriptions for venn diagram based on set sizes"""
@@ -71,6 +72,7 @@ def generate_petal_labels(datasets, fmt="{size}"):
         )
     return petal_labels
 
+
 def get_n_sets(petal_labels, dataset_labels):
     """Infer number of sets, check consistency"""
     n_sets = len(dataset_labels)
@@ -80,6 +82,7 @@ def get_n_sets(petal_labels, dataset_labels):
         if not (set(logic) <= {"0", "1"}):
             raise KeyError("Key not understood: " + logic)
     return n_sets
+
 
 def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw true Venn diagram, annotate petals and dataset labels"""
@@ -104,12 +107,14 @@ def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, le
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
 
+
 def update_hidden(hidden, logic, petal_labels):
     """Increment set's hidden count (sizes of intersections that are not displayed)"""
     for i, c in enumerate(logic):
         if c == "1":
             hidden[i] += int(petal_labels[logic])
     return hidden
+
 
 def draw_hint_explanation(ax, dataset_labels, fontsize):
     """Add explanation of 'n/d*' hints"""
@@ -119,6 +124,7 @@ def draw_hint_explanation(ax, dataset_labels, fontsize):
         "such as shared only between {} and {}".format(*example_labels)
     )
     ax.text(.5, -.1, hint_text, fontsize=fontsize, **CENTER_TEXT)
+
 
 def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
@@ -152,18 +158,13 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, fonts
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
     return ax
 
-def is_valid_dataset_dict(data):
-    """Validate passed data (must be dictionary of sets)"""
-    if not (hasattr(data, "keys") and hasattr(data, "values")):
-        return False
-    for dataset in data.values():
-        if not isinstance(dataset, set):
-            return False
-    else:
-        return True
 
-def init_axes(ax):
-    """Create axes if do not exist, set axes parameters"""
+def _venn_dispatch(data, *, func, petal_labels, fmt, hint_hidden, fontsize, cmap, alpha, legend_loc, ax):
+    """Generate petal labels, draw venn or pseudovenn diagram"""
+    if hint_hidden and (func == draw_pseudovenn6):
+        if fmt not in {None, "{size}"}: # TODO implement
+            error_message = "To use fmt='{}', set hint_hidden=False".format(fmt)
+            raise NotImplementedError(error_message)
     if ax is None:
         _, ax = subplots(nrows=1, ncols=1)
     ax.set(
@@ -171,50 +172,34 @@ def init_axes(ax):
         xlim=(-.05, 1.05), ylim=(-.05, 1.05),
         xticks=[], yticks=[],
     )
-    return ax
-
-def venn_dispatch(
-        data, func,
-        petal_labels=None, fmt=None, hint_hidden=False, fontsize=13,
-        cmap="viridis", alpha=.4,
-        legend_loc="upper right", ax=None
-    ):
-    """Check input, generate petal labels, draw venn or pseudovenn diagram"""
-    if not is_valid_dataset_dict(data):
-        raise TypeError("Only dictionaries of sets are understood")
-    if hint_hidden and (func == draw_pseudovenn6):
-        if fmt not in {None, "{size}"}:
-            error_message = "To use fmt='{}', set hint_hidden=False".format(fmt)
-            raise NotImplementedError(error_message)
-    n_sets = len(data)
-    if petal_labels is None:
-        if fmt is None:
-            fmt = "{size}"
-        petal_labels=generate_petal_labels(data.values(), fmt)
-    elif fmt is not None:
-        warn("Passing `fmt` with `petal_labels` will have no effect")
-    ax = init_axes(ax)
-    colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha)
     return func(
-        petal_labels=petal_labels, dataset_labels=data.keys(),
-        colors=colors, fontsize=fontsize, hint_hidden=hint_hidden,
-        legend_loc=legend_loc, ax=ax
+        petal_labels=(
+            petal_labels if (petal_labels is not None)
+            else generate_petal_labels(data.values(), fmt or "{size}")
+        ),
+        dataset_labels=data.keys(),
+        colors=generate_colors(n_colors=len(data), cmap=cmap, alpha=alpha),
+        fontsize=fontsize,
+        hint_hidden=hint_hidden,
+        legend_loc=legend_loc,
+        ax=ax,
     )
 
 
 @validate_arguments()
 def venn(data, *, petal_labels=None, fmt=None, hint_hidden=False, fontsize=13, cmap="viridis", alpha=.4, legend_loc="upper right", ax=None):
-    """Check input, generate petal labels, draw venn diagram"""
-    return venn_dispatch(
+    """Draw venn diagram"""
+    return _venn_dispatch(
         data, func=draw_venn,
         petal_labels=petal_labels, fmt=fmt, hint_hidden=hint_hidden,
         fontsize=fontsize, cmap=cmap, alpha=alpha, legend_loc=legend_loc, ax=ax,
     )
 
 
+@validate_arguments()
 def pseudovenn(data, *, petal_labels=None, fmt=None, hint_hidden=True, fontsize=13, cmap="viridis", alpha=.4, legend_loc="upper right", ax=None):
-    """Check input, generate petal labels, draw pseudovenn diagram"""
-    return venn_dispatch(
+    """Draw pseudovenn diagram for six sets"""
+    return _venn_dispatch(
         data, func=draw_pseudovenn6,
         petal_labels=petal_labels, fmt=fmt, hint_hidden=hint_hidden,
         fontsize=fontsize, cmap=cmap, alpha=alpha,
