@@ -5,7 +5,6 @@ from matplotlib.cm import ScalarMappable
 from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS, CENTER_TEXT
 from math import pi, sin, cos
-from functools import partial
 from warnings import warn
 
 def generate_colors(cmap="viridis", n_colors=6, alpha=.4):
@@ -201,10 +200,22 @@ def venn_dispatch(
         legend_loc=legend_loc, ax=ax
     )
 
-venn = partial(venn_dispatch, func=draw_venn, hint_hidden=False)
-venn.__doc__ = """Check input, generate petal labels, draw venn diagram.
-"""
 
-pseudovenn = partial(venn_dispatch, func=draw_pseudovenn6, hint_hidden=True)
-pseudovenn.__doc__ = """Check input, generate petal labels, draw pseudovenn diagram.
-"""
+def venn(data, petal_labels=None, fmt=None, hint_hidden=False, fontsize=13, cmap="viridis", alpha=.4, figsize=(8, 8), legend_loc="upper right", ax=None):
+    """Check input, generate petal labels, draw venn diagram"""
+    return venn_dispatch(
+        data, func=draw_venn,
+        petal_labels=petal_labels, fmt=fmt, hint_hidden=hint_hidden,
+        fontsize=fontsize, cmap=cmap, alpha=alpha, figsize=figsize,
+        legend_loc=legend_loc, ax=ax,
+    )
+
+
+def pseudovenn(data, petal_labels=None, fmt=None, hint_hidden=True, fontsize=13, cmap="viridis", alpha=.4, figsize=(8, 8), legend_loc="upper right", ax=None):
+    """Check input, generate petal labels, draw pseudovenn diagram"""
+    return venn_dispatch(
+        data, func=draw_pseudovenn6,
+        petal_labels=petal_labels, fmt=fmt, hint_hidden=hint_hidden,
+        fontsize=fontsize, cmap=cmap, alpha=alpha, figsize=figsize,
+        legend_loc=legend_loc, ax=ax,
+    )
