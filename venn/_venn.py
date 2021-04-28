@@ -6,6 +6,7 @@ from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS, CENTER_TEXT
 from math import pi, sin, cos
 from warnings import warn
+from ._utils import validate_arguments
 
 def generate_colors(cmap="viridis", n_colors=6, alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
@@ -201,6 +202,7 @@ def venn_dispatch(
     )
 
 
+@validate_arguments()
 def venn(data, petal_labels=None, fmt=None, hint_hidden=False, fontsize=13, cmap="viridis", alpha=.4, figsize=(8, 8), legend_loc="upper right", ax=None):
     """Check input, generate petal labels, draw venn diagram"""
     return venn_dispatch(

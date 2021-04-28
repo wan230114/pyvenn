@@ -12,7 +12,7 @@ def main(datasets, image_file, n=2):
     for _, k in zip(range(n, len(datasets)), datasets.keys()):
         del datasets[k]
     switch_backend("Agg")
-    ax = venn(datasets)
+    ax = venn(datasets, figsize=(5, 5))
     ax.figure.savefig(image_file, bbox_inches="tight")
     return 0
 
