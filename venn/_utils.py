@@ -23,21 +23,19 @@ def is_valid_dataset_dict(data):
         return True
 
 
-def validate_arguments():
+def validate_arguments(function):
     """Validate all passed positional and keyword arguments"""
-    def outer(function):
-        @wraps(function)
-        def inner(*args, **kwargs):
-            if len(args) and (not is_valid_dataset_dict(args[0])):
-                raise TypeError(INVALID_DATA_ERROR.format(function.__name__))
-            if len(args) > 1:
-                raise TypeError(KEYWORD_ARGS_ERROR.format(function.__name__))
-            if kwargs.get("figsize"):
-                warn_deprecation(DEPRECATED_ARG_WARNING.format("figsize"))
-            if "figsize" in kwargs:
-                del kwargs["figsize"]
-            if kwargs.get("petal_labels") and kwargs.get("fmt"):
-                warn("Passing `fmt` with `petal_labels` will have no effect")
-            return function(*args, **kwargs)
-        return inner
-    return outer
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if len(args) and (not is_valid_dataset_dict(args[0])):
+            raise TypeError(INVALID_DATA_ERROR.format(function.__name__))
+        if len(args) > 1:
+            raise TypeError(KEYWORD_ARGS_ERROR.format(function.__name__))
+        if kwargs.get("figsize"):
+            warn_deprecation(DEPRECATED_ARG_WARNING.format("figsize"))
+        if "figsize" in kwargs:
+            del kwargs["figsize"]
+        if kwargs.get("petal_labels") and kwargs.get("fmt"):
+            warn("Passing `fmt` with `petal_labels` will have no effect")
+        return function(*args, **kwargs)
+    return wrapper

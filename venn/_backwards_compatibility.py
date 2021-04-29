@@ -1,5 +1,5 @@
 from ._utils import warn_deprecation
-from ._venn import generate_petal_labels, _prepare_ax, draw_venn
+from ._venn import generate_petal_labels, draw_venn
 from functools import partial
 
 
@@ -36,7 +36,7 @@ def vennx(labels, names, colors=OLD_COLORS, figsize=None, dpi=None, fontsize=10)
     ax = draw_venn(
         petal_labels=labels, dataset_labels=names, hint_hidden=False,
         colors=colors, figsize=figsize, fontsize=fontsize,
-        legend_loc="best", ax=_prepare_ax(None, figsize=figsize),
+        legend_loc="best", ax=None,
     )
     return ax.figure, ax
 

@@ -2,6 +2,7 @@ from matplotlib.pyplot import subplots
 from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from matplotlib.cm import ScalarMappable
+from functools import wraps
 from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS, CENTER_TEXT
 from math import pi, sin, cos
@@ -84,22 +85,25 @@ def get_n_sets(petal_labels, dataset_labels):
     return n_sets
 
 
-def _prepare_ax(ax, figsize=None):
+def ensure_axes(function):
     """Create ax if does not exist, set style"""
-    if ax is None:
-        _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
-    ax.set(
-        aspect="equal", frame_on=False,
-        xlim=(-.05, 1.05), ylim=(-.05, 1.05),
-        xticks=[], yticks=[],
-    )
-    return ax
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if not kwargs.get("ax"):
+            _, kwargs["ax"] = subplots(figsize=kwargs.get("figsize"))
+        kwargs["ax"].set(
+            aspect="equal", frame_on=False,
+            xlim=(-.05, 1.05), ylim=(-.05, 1.05),
+            xticks=[], yticks=[],
+        )
+        return function(*args, **kwargs)
+    return wrapper
 
 
-@validate_arguments()
+@ensure_axes
+@validate_arguments
 def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw true Venn diagram, annotate petals and dataset labels"""
-    ax = _prepare_ax(ax)
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if 2 <= n_sets < 6:
         draw_shape = draw_ellipse
@@ -140,7 +144,8 @@ def draw_hint_explanation(ax, dataset_labels, fontsize):
     ax.text(.5, -.1, hint_text, fontsize=fontsize, **CENTER_TEXT)
 
 
-@validate_arguments()
+@ensure_axes
+@validate_arguments
 def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
@@ -194,7 +199,8 @@ def _venn_dispatch(data, *, func, petal_labels, fmt, hint_hidden, fontsize, cmap
     )
 
 
-@validate_arguments()
+@ensure_axes
+@validate_arguments
 def venn(data, *, petal_labels=None, fmt=None, hint_hidden=False, fontsize=13, cmap="viridis", alpha=.4, legend_loc="upper right", ax=None):
     """Draw venn diagram"""
     return _venn_dispatch(
@@ -204,7 +210,8 @@ def venn(data, *, petal_labels=None, fmt=None, hint_hidden=False, fontsize=13, c
     )
 
 
-@validate_arguments()
+@ensure_axes
+@validate_arguments
 def pseudovenn(data, *, petal_labels=None, fmt=None, hint_hidden=True, fontsize=13, cmap="viridis", alpha=.4, legend_loc="upper right", ax=None):
     """Draw pseudovenn diagram for six sets"""
     return _venn_dispatch(
