@@ -43,12 +43,6 @@ def draw_triangle(x1, y1, x2, y2, x3, y3, _dim, _angle, color, ax):
     ))
 
 
-def generate_logics(n_sets):
-    """Generate intersection identifiers in binary (0010 etc)"""
-    for i in range(1, 2**n_sets):
-        yield bin(i)[2:].zfill(n_sets)
-
-
 def generate_petal_labels(datasets, fmt="{size}"):
     """Generate petal descriptions for venn diagram based on set sizes"""
     datasets = list(datasets)
@@ -56,7 +50,7 @@ def generate_petal_labels(datasets, fmt="{size}"):
     dataset_union = set.union(*datasets)
     universe_size = len(dataset_union)
     petal_labels = {}
-    for logic in generate_logics(n_sets):
+    for logic in (bin(i)[2:].zfill(n_sets) for i in range(1, 2**n_sets)):
         included_sets = [
             datasets[i] for i in range(n_sets) if logic[i] == "1"
         ]
@@ -69,7 +63,7 @@ def generate_petal_labels(datasets, fmt="{size}"):
         )
         petal_labels[logic] = fmt.format(
             logic=logic, size=len(petal_set),
-            percentage=(100*len(petal_set)/universe_size)
+            percentage=(100*len(petal_set)/universe_size),
         )
     return petal_labels
 
