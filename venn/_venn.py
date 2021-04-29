@@ -84,6 +84,7 @@ def get_n_sets(petal_labels, dataset_labels):
     return n_sets
 
 
+@validate_arguments()
 def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw true Venn diagram, annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
@@ -159,19 +160,24 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, fonts
     return ax
 
 
+def _prepare_ax(ax, figsize=None):
+    """Create ax if does not exist, set style"""
+    if ax is None:
+        _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
+    ax.set(
+        aspect="equal", frame_on=False,
+        xlim=(-.05, 1.05), ylim=(-.05, 1.05),
+        xticks=[], yticks=[],
+    )
+    return ax
+
+
 def _venn_dispatch(data, *, func, petal_labels, fmt, hint_hidden, fontsize, cmap, alpha, legend_loc, ax):
     """Generate petal labels, draw venn or pseudovenn diagram"""
     if hint_hidden and (func == draw_pseudovenn6):
         if fmt not in {None, "{size}"}: # TODO implement
             error_message = "To use fmt='{}', set hint_hidden=False".format(fmt)
             raise NotImplementedError(error_message)
-    if ax is None:
-        _, ax = subplots(nrows=1, ncols=1)
-    ax.set(
-        aspect="equal", frame_on=False,
-        xlim=(-.05, 1.05), ylim=(-.05, 1.05),
-        xticks=[], yticks=[],
-    )
     return func(
         petal_labels=(
             petal_labels if (petal_labels is not None)
@@ -182,7 +188,7 @@ def _venn_dispatch(data, *, func, petal_labels, fmt, hint_hidden, fontsize, cmap
         fontsize=fontsize,
         hint_hidden=hint_hidden,
         legend_loc=legend_loc,
-        ax=ax,
+        ax=_prepare_ax(ax),
     )
 
 

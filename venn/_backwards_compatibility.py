@@ -1,5 +1,5 @@
 from ._utils import warn_deprecation
-from ._venn import generate_petal_labels, draw_venn
+from ._venn import generate_petal_labels, _prepare_ax, draw_venn
 from functools import partial
 
 
@@ -29,14 +29,14 @@ def get_labels(data, fill=["number"]):
     return generate_petal_labels(data, fmt)
 
 
-def vennx(labels, names, colors=OLD_COLORS, figsize=None, dpi=None, fontsize=14):
+def vennx(labels, names, colors=OLD_COLORS, figsize=None, dpi=None, fontsize=10):
     warn_deprecation(VENNX_DEPRECATION_WARNING.format(len(names)))
     if dpi is not None:
         warn_deprecation(DPI_DEPRECATION_WARNING)
     ax = draw_venn(
         petal_labels=labels, dataset_labels=names, hint_hidden=False,
         colors=colors, figsize=figsize, fontsize=fontsize,
-        legend_loc="best", ax=None,
+        legend_loc="best", ax=_prepare_ax(None, figsize=figsize),
     )
     return ax.figure, ax
 

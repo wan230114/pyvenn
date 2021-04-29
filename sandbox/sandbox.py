@@ -11,7 +11,7 @@ from venn import venn, pseudovenn, get_labels, venn3
 
 
 CMAPS = ["cool", list("rgb"), "plasma", "viridis", "Set1"]
-LETTERS = iter(ascii_uppercase)
+LETTERS = iter(ascii_uppercase + "αβγ")
 
 
 make_random_data = lambda N: {
