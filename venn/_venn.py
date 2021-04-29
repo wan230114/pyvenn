@@ -2,7 +2,7 @@ from matplotlib.pyplot import subplots
 from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
 from matplotlib.cm import ScalarMappable
-from functools import wraps
+from functools import wraps, lru_cache
 from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS, CENTER_TEXT
 from math import pi, sin, cos
@@ -127,11 +127,12 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, edgec
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if n_sets != 6:
         raise NotImplementedError("Pseudovenn implemented only for 6 sets")
-    angles = [(2-i)*pi/3 for i in range(6)]
-    xs, ys = [.5+.2*cos(a) for a in angles], [.5+.2*sin(a) for a in angles]
-    for x, y, color in zip(xs, ys, colors):
+    angles = [(2 - i) * pi / 3 for i in range(n_sets)]
+    xs = lru_cache(2)(lambda d: [.5 + d * cos(a) for a in angles])
+    ys = lru_cache(2)(lambda d: [.5 + d * sin(a) for a in angles])
+    for x, y, color in zip(xs(.2), ys(.2), colors):
         draw_ellipse(x, y, .6, .6, 0, color, edgecolor, ax)
-    for x, y in zip(xs, ys):
+    for x, y in zip(xs(.2), ys(.2)):
         draw_ellipse(x, y, .6, .6, 0, (0, 0, 0, 0), edgecolor, ax)
     if hint_hidden:
         hidden = [0] * n_sets
@@ -143,8 +144,7 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, edgec
         elif hint_hidden:
             INPLACE_update_hidden(hidden, logic, petal_labels)
     if hint_hidden:
-        xs, ys = [.5+.57*cos(a) for a in angles], [.5+.57*sin(a) for a in angles]
-        for x, y, hidden_value in zip(xs, ys, hidden):
+        for x, y, hidden_value in zip(xs(.57), ys(.57), hidden):
             hint = "{}\n n/d*".format(hidden_value)
             ax.text(x, y, hint, fontsize=fontsize, **CENTER_TEXT)
         ax.set(xlim=(-.2, 1.05))
