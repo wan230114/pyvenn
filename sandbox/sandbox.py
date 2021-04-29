@@ -7,11 +7,12 @@ from numpy.random import choice
 from itertools import islice
 
 sys_path.insert(0, getcwd())
-from venn import venn, pseudovenn, get_labels, venn3
+from venn import venn, pseudovenn, generate_petal_labels, draw_venn
+from venn import generate_colors, get_labels, venn3
 
 
 CMAPS = ["cool", list("rgb"), "plasma", "viridis", "Set1"]
-LETTERS = iter(ascii_uppercase + "αβγ")
+LETTERS = iter(ascii_uppercase + "αβγδεζ")
 
 
 make_random_data = lambda N: {
@@ -30,8 +31,19 @@ def plot_modern_venns(outdir):
     figure.savefig(path.join(outdir, "modern.pdf"), bbox_inches="tight")
 
 
-def plot_modern_venns_custom(outdir):
-    pass
+def plot_modern_venns_custom_oldschool(outdir):
+    data = make_random_data(N=3)
+    petal_labels = {
+        logic: (value if int(value) >= 45 else "ns") for logic, value
+        in generate_petal_labels(data.values(), fmt="{size}").items()
+        if logic not in ("001", "010", "100")
+    }
+    ax = draw_venn(
+        petal_labels=petal_labels, dataset_labels=data.keys(),
+        hint_hidden=False, colors=generate_colors(n_colors=3),
+        fontsize=13, legend_loc="best", ax=None,
+    )
+    ax.figure.savefig(path.join(outdir, "custom_os.pdf"), bbox_inches="tight")
 
 
 def plot_legacy_venns(outdir):
@@ -43,7 +55,7 @@ def plot_legacy_venns(outdir):
 
 def main(outdir):
     plot_modern_venns(outdir)
-    plot_modern_venns_custom(outdir)
+    plot_modern_venns_custom_oldschool(outdir)
     plot_legacy_venns(outdir)
     return 0
 

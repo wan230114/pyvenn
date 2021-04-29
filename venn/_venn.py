@@ -84,9 +84,22 @@ def get_n_sets(petal_labels, dataset_labels):
     return n_sets
 
 
+def _prepare_ax(ax, figsize=None):
+    """Create ax if does not exist, set style"""
+    if ax is None:
+        _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
+    ax.set(
+        aspect="equal", frame_on=False,
+        xlim=(-.05, 1.05), ylim=(-.05, 1.05),
+        xticks=[], yticks=[],
+    )
+    return ax
+
+
 @validate_arguments()
 def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw true Venn diagram, annotate petals and dataset labels"""
+    ax = _prepare_ax(ax)
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if 2 <= n_sets < 6:
         draw_shape = draw_ellipse
@@ -127,6 +140,7 @@ def draw_hint_explanation(ax, dataset_labels, fontsize):
     ax.text(.5, -.1, hint_text, fontsize=fontsize, **CENTER_TEXT)
 
 
+@validate_arguments()
 def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, fontsize, legend_loc, ax):
     """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
@@ -160,18 +174,6 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, fonts
     return ax
 
 
-def _prepare_ax(ax, figsize=None):
-    """Create ax if does not exist, set style"""
-    if ax is None:
-        _, ax = subplots(nrows=1, ncols=1, figsize=figsize)
-    ax.set(
-        aspect="equal", frame_on=False,
-        xlim=(-.05, 1.05), ylim=(-.05, 1.05),
-        xticks=[], yticks=[],
-    )
-    return ax
-
-
 def _venn_dispatch(data, *, func, petal_labels, fmt, hint_hidden, fontsize, cmap, alpha, legend_loc, ax):
     """Generate petal labels, draw venn or pseudovenn diagram"""
     if hint_hidden and (func == draw_pseudovenn6):
@@ -188,7 +190,7 @@ def _venn_dispatch(data, *, func, petal_labels, fmt, hint_hidden, fontsize, cmap
         fontsize=fontsize,
         hint_hidden=hint_hidden,
         legend_loc=legend_loc,
-        ax=_prepare_ax(ax),
+        ax=ax,
     )
 
 
