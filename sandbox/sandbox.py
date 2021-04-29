@@ -25,9 +25,9 @@ def plot_modern_venns(outdir):
     for N, cmap, ax in zip(range(2, 7), CMAPS, axs.flatten()):
         venn(
             make_random_data(N), fmt="{percentage:.1f}%", cmap=cmap,
-            fontsize=15, legend_loc="upper left", ax=ax,
+            edgecolor="black", fontsize=15, legend_loc="upper left", ax=ax,
         )
-    pseudovenn(make_random_data(N=6), cmap="plasma", ax=axs[-1,-1])
+    pseudovenn(make_random_data(N=6), cmap="hsv", edgecolor="k", ax=axs[-1,-1])
     figure.savefig(path.join(outdir, "modern.pdf"), bbox_inches="tight")
 
 
@@ -41,7 +41,7 @@ def plot_modern_venns_custom_oldschool(outdir):
     ax = draw_venn(
         petal_labels=petal_labels, dataset_labels=data.keys(),
         hint_hidden=False, colors=generate_colors(n_colors=3),
-        fontsize=13, legend_loc="best", ax=None,
+        edgecolor="black", fontsize=13, legend_loc="best", ax=None,
     )
     ax.figure.savefig(path.join(outdir, "custom_os.pdf"), bbox_inches="tight")
 
