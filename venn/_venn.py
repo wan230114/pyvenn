@@ -41,25 +41,35 @@ def draw_triangle(ax, x1, y1, x2, y2, x3, y3, _dim, _angle, color):
         )
     )
 
-def draw_text(ax, x, y, text, fontsize, color="black"):
+def draw_text(ax, x, y, text, fontsize, color="black", filename=None):
     """Wrapper for drawing text"""
-    ax.text(
-        x, y, text, fontsize=fontsize, color=color,
-        horizontalalignment="center", verticalalignment="center"
-    )
+    if not filename:
+        ax.text(
+            x, y, text, fontsize=fontsize, color=color,
+            horizontalalignment="center", verticalalignment="center",
+        )
+    else:
+        ax.text(
+            x, y, text, fontsize=fontsize, color=color,
+            horizontalalignment="center", verticalalignment="center",
+            url=filename,
+            bbox=dict(url=filename, alpha=0.001)
+        )
 
 def generate_logics(n_sets):
     """Generate intersection identifiers in binary (0010 etc)"""
     for i in range(1, 2**n_sets):
         yield bin(i)[2:].zfill(n_sets)
 
-def generate_petal_labels(datasets, fmt="{size}"):
+def generate_petal_labels(datasets, fmt="{size}", outname="out"):
     """Generate petal descriptions for venn diagram based on set sizes"""
+    # print(outname, datasets)
     datasets = list(datasets)
     n_sets = len(datasets)
     dataset_union = set.union(*datasets)
     universe_size = len(dataset_union)
     petal_labels = {}
+    datas = {}
     for logic in generate_logics(n_sets):
         included_sets = [
             datasets[i] for i in range(n_sets) if logic[i] == "1"
@@ -75,7 +85,27 @@ def generate_petal_labels(datasets, fmt="{size}"):
             logic=logic, size=len(petal_set),
             percentage=(100*len(petal_set)/max(universe_size, 1))
         )
-    return petal_labels
+        name = ''.join([y for x, y in zip(logic, "ABCDEF") if int(x)])
+        datas[(logic, name)] = petal_set
+    names = dict(zip(
+        sorted([x[1] for x in sorted(datas, key=lambda x:x[1])],key=len),
+        range(1, len(datas)+1)
+    ))
+    # print("names:", names)
+    names_out = {}
+    for x in datas:
+        logic, name = x
+        outname_final = "%s%02d%s.txt" % (
+                  outname, names[name], name)
+        names_out[logic] = outname_final
+        print(*datas[x], sep="\n", end="",
+              file=open(outname_final, "w"))
+    # print(logic, petal_set)
+    # print("----")
+    # print("datas:", datas)
+    # print("names_out:", names_out)
+    # print("petal_labels:", petal_labels)
+    return petal_labels, names_out
 
 def init_axes(ax, figsize):
     """Create axes if do not exist, set axes parameters"""
@@ -98,7 +128,7 @@ def get_n_sets(petal_labels, dataset_labels):
             raise KeyError("Key not understood: " + logic)
     return n_sets
 
-def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax):
+def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax, names_out):
     """Draw true Venn diagram, annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if 2 <= n_sets < 6:
@@ -117,9 +147,13 @@ def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fon
         # some petals could have been modified manually:
         if logic in PETAL_LABEL_COORDS[n_sets]:
             x, y = PETAL_LABEL_COORDS[n_sets][logic]
-            draw_text(ax, x, y, petal_label, fontsize=fontsize)
+            draw_text(ax, x, y, petal_label, fontsize=fontsize, filename=names_out[logic])
     if legend_loc is not None:
+        # dataset_labels = {r"Hyperlink: \url{http://google.com}"}
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
+        # ax.annotate("Link", xy=(1,1), xytext=(1,1),
+        #             url='http://matplotlib.org', 
+        #             bbox=dict(color='b', alpha=.4, url='http://matplotlib.org'))
     return ax
 
 def update_hidden(hidden, logic, petal_labels):
@@ -138,7 +172,7 @@ def draw_hint_explanation(ax, dataset_labels, fontsize):
     )
     draw_text(ax, .5, -.1, hint_text, fontsize)
 
-def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax):
+def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax, names_out):
     """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if n_sets != 6:
@@ -155,7 +189,7 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsi
         # not all theoretical intersections are shown, and petals could have been modified manually:
         if logic in PSEUDOVENN_PETAL_COORDS[6]:
             x, y = PSEUDOVENN_PETAL_COORDS[6][logic]
-            draw_text(ax, x, y, petal_label, fontsize)
+            draw_text(ax, x, y, petal_label, fontsize, filename=names_out[logic])
         elif hint_hidden:
             hidden = update_hidden(hidden, logic, petal_labels)
     if hint_hidden:
@@ -167,7 +201,11 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsi
         ax.set(xlim=(-.2, 1.05))
         draw_hint_explanation(ax, dataset_labels, fontsize)
     if legend_loc is not None:
+        # dataset_labels = {r"Hyperlink: \url{http://google.com}"}
         ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
+        # ax.annotate("Link", xy=(1,1), xytext=(1,1),
+        #             url='http://matplotlib.org', 
+        #             bbox=dict(color='b', alpha=.4, url='http://matplotlib.org'))
     return ax
 
 def is_valid_dataset_dict(data):
@@ -180,7 +218,7 @@ def is_valid_dataset_dict(data):
     else:
         return True
 
-def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None):
+def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None, names_out=None):
     """Check input, generate petal labels, draw venn or pseudovenn diagram"""
     if not is_valid_dataset_dict(data):
         raise TypeError("Only dictionaries of sets are understood")
@@ -188,8 +226,16 @@ def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", a
         error_message = "To use fmt='{}', set hint_hidden=False".format(fmt)
         raise NotImplementedError(error_message)
     n_sets = len(data)
+    outname = '__vs__'.join(
+        map(lambda x: x[0]+"."+x[1], zip("ABCDEF", data.keys()))
+    ) + "___"
+    petal_labels, names_out = generate_petal_labels(data.values(), fmt=fmt, outname=outname)
+    # print("data:", data)
+    for x in data:
+        print(*data[x], sep="\n", file=open(outname+"set-%s.txt"%x, "w"))
     return func(
-        petal_labels=generate_petal_labels(data.values(), fmt),
+        petal_labels=petal_labels,
+        names_out=names_out,
         dataset_labels=data.keys(), hint_hidden=hint_hidden,
         colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
         figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax

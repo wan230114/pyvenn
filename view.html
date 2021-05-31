@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- <title>无限翻页测试</title> -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript">
+    window.onload = function() {
+        var btn = document.getElementById('btn');
+        var timer = null;
+        var isTop = true;
+        //获取页面可视区高度
+        var clientHeight = document.documentElement.clientHeight;
+        console.log(clientHeight)
+
+        //滚动条滚动时触发
+        window.onscroll = function() {
+            //显示回到顶部按钮
+            var osTop = document.documentElement.scrollTop || document.body.scrollTop;
+            if (osTop >= clientHeight) {
+                btn.style.display = "block";
+            } else {
+                btn.style.display = "none";
+            };
+            //回到顶部过程中用户滚动滚动条，停止定时器
+            if (!isTop) {
+                clearInterval(timer);
+            };
+            isTop = false;
+
+        };
+
+        btn.onclick = function() {
+            //设置定时器
+            timer = setInterval(function() {
+                //获取滚动条距离顶部高度
+                var osTop = document.documentElement.scrollTop || document.body.scrollTop;
+                console.log('osTop ' + osTop);
+                var ispeed = Math.floor(-osTop / 7);
+                console.log('ispeed ' + ispeed);
+                document.documentElement.scrollTop = document.body.scrollTop = osTop + ispeed;
+                //到达顶部，清除定时器
+                if (osTop == 0) {
+                    clearInterval(timer);
+                };
+                isTop = true;
+
+            }, 0);
+        };
+    };
+    </script>
+    <style type="text/css">
+    #btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 70px;
+        height: 50px;
+        border: 1px solid red;
+        display: none;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    #head {
+        text-align: right;
+        color: grey;
+        font-family: 方正姚体;
+    }
+
+    #spinner {
+        position: fixed;
+        top: 20px;
+        left: 40%;
+        display: block;
+        color: red;
+        font-weight: 500;
+        background-color: rgba(80, 80, 90, 0.22);
+        padding-top: 20px;
+        padding-bottom: 20px;
+        padding-left: 100px;
+        padding-right: 100px;
+        border-radius: 15px;
+    }
+
+    .catlog {
+        font-size: 18px;
+        line-height: 30px;
+        color: black;
+        font-family: sans-serif;
+    }
+    </style>
+</head>
+
+<body>
+<div id="sample"></div>
+<div id="fixedLayer"></div>
+<div id="spinner">正在加载</div>
+<div id="btn"><a href="#menu">返回顶部</a></div>
+<script type="text/javascript">    var index = 0;
+    var arr = new Array('./test__venn.svg')
+
+    function lowEnough() {
+        var pageHeight = Math.max(document.body.scrollHeight, document.body.offsetHeight);
+        var viewportHeight = window.innerHeight ||
+            document.documentElement.clientHeight ||
+            document.body.clientHeight || 0;
+        var scrollHeight = window.pageYOffset ||
+            document.documentElement.scrollTop ||
+            document.body.scrollTop || 0;
+        // console.log(pageHeight);
+        // console.log(viewportHeight);
+        // console.log(scrollHeight);
+        return pageHeight - viewportHeight - scrollHeight < 20;
+    }
+
+    function doSomething() {
+        file = arr[index]
+        $('#sample').append('<p><a name="' + file + '">' + file + '</a></p><img src="' + file + '" /></p>');
+        index++;
+        pollScroll(); //继续循环
+        $('#spinner').hide();
+    }
+
+    function checkScroll() {
+        if (index == arr.length) return;
+        if (!lowEnough()) return pollScroll();
+
+        $('#spinner').show();
+        setTimeout(doSomething, 0);
+
+    }
+
+    function pollScroll() {
+        setTimeout(checkScroll, 0);
+    }
+
+    function showall() {
+        $('#sample').append('<h1>目录<a name="menu></a></h1>');
+        for (var i = 0; i < arr.length; i++) {
+            $('#sample').append('<a href="#' + arr[i] + '" class="catlog" >&nbsp;' + arr[i] + '</a><br>');
+            // console.log(arr[i]);
+        };
+        $('#spinner').hide();
+    }
+
+    function showall2() {
+        $('#sample').append('<h1>预览</h1>');
+        for (var i = 0; i < arr.length; i++) {
+            $('#sample').append('<table border="2"><td valign="top"><p><a name="' + arr[i] + '">' + arr[i] + '</a></p><object data="' + arr[i] + '" type="image/svg+xml"></object></td></table>');
+        };
+        $('#sample').append('');
+        $('#spinner').hide();
+    }
+    // $('#sample').append('<p class="head"><a href="#home" title="返回首页"><img class="logo" align="left" src="src/images/logo.png"></a><a name="测序错误率分布检查">北京诺禾致源科技股份有限公司</a></p>');
+    showall();
+    showall2();
+    // checkScroll();
+    </script>
+</body>
+
+</html>

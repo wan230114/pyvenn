@@ -22,3 +22,10 @@ This iteration of the library implements two main functions:
 of sets between 2 and 5 using ellipses, and for 6 sets using triangles
 * `pseudovenn(dataset_dict, **kwargs)` which plots a Venn-like intersection of
 six circles (not all intersections are present in such a plot, but many are).
+
+
+---
+TODOLIST:
+
+- [x] ~~*改进svg图，使得点击能进行结果文件超链接打开。*~~ [~~*2021-06-01_wd2_06:19:52*~~]
+- [ ] 下一步改进 ax.legend 图注能进行超链接的改进。
