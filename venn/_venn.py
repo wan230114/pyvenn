@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 from matplotlib.pyplot import subplots
 from matplotlib.patches import Ellipse, Polygon
 from matplotlib.colors import to_rgba
@@ -6,6 +7,7 @@ from ._constants import SHAPE_COORDS, SHAPE_DIMS, SHAPE_ANGLES
 from ._constants import PETAL_LABEL_COORDS, PSEUDOVENN_PETAL_COORDS
 from math import pi, sin, cos
 from functools import partial
+import os
 
 def generate_colors(cmap="viridis", n_colors=6, alpha=.4):
     """Generate colors from matplotlib colormap; pass list to use exact colors"""
@@ -61,7 +63,7 @@ def generate_logics(n_sets):
     for i in range(1, 2**n_sets):
         yield bin(i)[2:].zfill(n_sets)
 
-def generate_petal_labels(datasets, fmt="{size}", outname="out"):
+def generate_petal_labels(datasets, fmt="{size}", outname="out", outdir="."):
     """Generate petal descriptions for venn diagram based on set sizes"""
     # print(outname, datasets)
     datasets = list(datasets)
@@ -99,7 +101,7 @@ def generate_petal_labels(datasets, fmt="{size}", outname="out"):
                   outname, names[name], name)
         names_out[logic] = outname_final
         print(*datas[x], sep="\n", end="",
-              file=open(outname_final, "w"))
+              file=open(os.path.join(outdir, outname_final), "w"))
     # print(logic, petal_set)
     # print("----")
     # print("datas:", datas)
@@ -128,7 +130,7 @@ def get_n_sets(petal_labels, dataset_labels):
             raise KeyError("Key not understood: " + logic)
     return n_sets
 
-def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax, names_out):
+def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax, names_out, outname, data, outdir):
     """Draw true Venn diagram, annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if 2 <= n_sets < 6:
@@ -150,11 +152,24 @@ def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fon
             draw_text(ax, x, y, petal_label, fontsize=fontsize, filename=names_out[logic])
     if legend_loc is not None:
         # dataset_labels = {r"Hyperlink: \url{http://google.com}"}
-        ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
-        # ax.annotate("Link", xy=(1,1), xytext=(1,1),
-        #             url='http://matplotlib.org', 
-        #             bbox=dict(color='b', alpha=.4, url='http://matplotlib.org'))
-    return ax
+        # ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
+        # print(dataset_labels, legend_loc)
+        for i, x, l, c in zip(range(len(dataset_labels)), dataset_labels, [len(x) for x in data.values()], colors):
+            annoloc1 = (0.96, 1-i*0.05)
+            annoloc2 = (1, 1-i*0.05)
+            # print(colors)
+            ax.annotate("   ", xy=annoloc1,
+                        xytext=annoloc1,
+                        url=outname+"set.%s.txt"%x, 
+                        bbox=dict(color=c, alpha=.4, url=outname+"set.%s.txt"%x))
+            ax.annotate("%s(%s)"%(x,l), xy=annoloc2,
+                        xytext=annoloc2,
+                        url=outname+"set.%s.txt"%x, 
+                        bbox=dict(color="w", alpha=.4, url=outname+"set.%s.txt"%x))
+    plt.savefig(f'{os.path.join(outdir, outname)}venn.pdf', dpi=200, bbox_inches='tight')
+    plt.savefig(f'{os.path.join(outdir, outname)}venn.png', dpi=200, bbox_inches='tight')
+    plt.savefig(f'{os.path.join(outdir, outname)}venn.svg', dpi=200, bbox_inches='tight')
+    return ax, outname
 
 def update_hidden(hidden, logic, petal_labels):
     """Increment set's hidden count (sizes of intersections that are not displayed)"""
@@ -172,7 +187,7 @@ def draw_hint_explanation(ax, dataset_labels, fontsize):
     )
     draw_text(ax, .5, -.1, hint_text, fontsize)
 
-def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax, names_out):
+def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fontsize, legend_loc, ax, names_out, outname, data, outdir):
     """Draw intersection of 6 circles (does not include some combinations), annotate petals and dataset labels"""
     n_sets = get_n_sets(petal_labels, dataset_labels)
     if n_sets != 6:
@@ -202,11 +217,24 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsi
         draw_hint_explanation(ax, dataset_labels, fontsize)
     if legend_loc is not None:
         # dataset_labels = {r"Hyperlink: \url{http://google.com}"}
-        ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
-        # ax.annotate("Link", xy=(1,1), xytext=(1,1),
-        #             url='http://matplotlib.org', 
-        #             bbox=dict(color='b', alpha=.4, url='http://matplotlib.org'))
-    return ax
+        # ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
+        # print(dataset_labels, legend_loc)
+        for i, x, l, c in zip(range(len(dataset_labels)), dataset_labels, [len(x) for x in data.values()], colors):
+            annoloc1 = (0.9, 1-i*0.05)
+            annoloc2 = (0.94, 1-i*0.05)
+            # print(colors)
+            ax.annotate("   ", xy=annoloc1,
+                        xytext=annoloc1,
+                        url=outname+"set.%s.txt"%x, 
+                        bbox=dict(color=c, alpha=.4, url=outname+"set.%s.txt"%x))
+            ax.annotate("%s(%s)"%(x,l), xy=annoloc2,
+                        xytext=annoloc2,
+                        url=outname+"set.%s.txt"%x, 
+                        bbox=dict(color="w", alpha=.4, url=outname+"set.%s.txt"%x))
+    plt.savefig(f'{os.path.join(outdir, outname)}venn.pdf', dpi=200, bbox_inches='tight')
+    plt.savefig(f'{os.path.join(outdir, outname)}venn.png', dpi=200, bbox_inches='tight')
+    plt.savefig(f'{os.path.join(outdir, outname)}venn.svg', dpi=200, bbox_inches='tight')
+    return ax, outname
 
 def is_valid_dataset_dict(data):
     """Validate passed data (must be dictionary of sets)"""
@@ -218,8 +246,9 @@ def is_valid_dataset_dict(data):
     else:
         return True
 
-def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None, names_out=None):
+def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", alpha=.4, figsize=(8, 8), fontsize=13, legend_loc="upper right", ax=None, names_out=None, outdir="."):
     """Check input, generate petal labels, draw venn or pseudovenn diagram"""
+    os.makedirs(outdir, exist_ok=True)
     if not is_valid_dataset_dict(data):
         raise TypeError("Only dictionaries of sets are understood")
     if hint_hidden and (func == draw_pseudovenn6) and (fmt != "{size}"):
@@ -229,13 +258,14 @@ def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", a
     outname = '__vs__'.join(
         map(lambda x: x[0]+"."+x[1], zip("ABCDEF", data.keys()))
     ) + "___"
-    petal_labels, names_out = generate_petal_labels(data.values(), fmt=fmt, outname=outname)
+    petal_labels, names_out = generate_petal_labels(data.values(), fmt=fmt, outname=outname, outdir=outdir)
     # print("data:", data)
+    # print(names_out)
     for x in data:
-        print(*data[x], sep="\n", file=open(outname+"set-%s.txt"%x, "w"))
+        print(*data[x], sep="\n", file=open(os.path.join(outdir, outname+"set.%s.txt"%x), "w"))
     return func(
-        petal_labels=petal_labels,
-        names_out=names_out,
+        names_out=names_out, outname=outname, outdir=outdir,
+        petal_labels=petal_labels, data=data,
         dataset_labels=data.keys(), hint_hidden=hint_hidden,
         colors=generate_colors(n_colors=n_sets, cmap=cmap, alpha=alpha),
         figsize=figsize, fontsize=fontsize, legend_loc=legend_loc, ax=ax
