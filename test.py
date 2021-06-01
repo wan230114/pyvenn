@@ -6,7 +6,7 @@
 # @ Author Email: 1170101471@qq.com
 # @ Created Date: 2021-04-25, 01:44:13
 # @ Modified By: Chen Jun
-# @ Last Modified: 2021-04-25, 23:02:31
+# @ Last Modified: 2021-06-01, 23:51:03
 #############################################
 
 # %%
@@ -20,18 +20,45 @@ reload(venn)
 #          url="https://www.baidu.com/s?ie=UTF-8&wd=test",
 #          bbox=dict(url="https://www.baidu.com/s?ie=UTF-8&wd=test", alpha=0.001,)
 #          )
-venn.venn({"A": {1, 2, 3}, "B": {1, 2, 3, 4}, "C": {1, 2, 3, 4, 5}},
+ax, outname = venn.venn({"A-set": {1, 2, 3},
+           "B-set": {1, 2, 3, 4},
+           "C-set-demo": {1, 2, 3, 4, 5, 6, 7, 8, 9, 0},
+          #  "D":{99, 100},
+          #  "E":{99, 100},
+           },
      fmt="{percentage:.1f}%\n({size})",
      figsize=(9, 9),
+     fontsize=12,
+     outdir="out-test",
      #   alpha=.5,
      #  cmap=["r", "g", "b"]
      #  cmap="Accent"
      #  cmap="Set2"  # 蓝 绿 紫
      #  cmap="Set3"  # 蓝 绿 黄
      #  cmap=list("rgy")  # 红 绿 黄
-     cmap=list("rgb")  # 红 绿 黄
+     cmap=list("rgby")  # 红 绿 黄
      )
-plt.savefig('test__venn.pdf', dpi=200, bbox_inches='tight')
-plt.savefig('test__venn.png', dpi=200, bbox_inches='tight')
-plt.savefig('test__venn.svg', dpi=200, bbox_inches='tight')
+
 #%%
+
+ax, outname = venn.venn({"A-set": {1, 2, 3},
+           "B-set": {1, 2, 3, 4},
+           "C-set-demo": {1, 2, 3, 4, 5, 6, 7, 8, 9, 0},
+           "D":{99, 100},
+          #  "E":{99, 100},
+           },
+     fmt="{percentage:.1f}%\n({size})",
+     figsize=(9, 9),
+     fontsize=12,
+     outdir="out-test",
+     #   alpha=.5,
+     #  cmap=["r", "g", "b"]
+     #  cmap="Accent"
+     #  cmap="Set2"  # 蓝 绿 紫
+     #  cmap="Set3"  # 蓝 绿 黄
+     #  cmap=list("rgy")  # 红 绿 黄
+     # cmap=list("rgby")  # 红 绿 黄
+     )
+# plt.savefig(f'{outname}venn.pdf', dpi=200, bbox_inches='tight')
+# plt.savefig(f'{outname}venn.png', dpi=200, bbox_inches='tight')
+# plt.savefig(f'{outname}venn.svg', dpi=200, bbox_inches='tight')
