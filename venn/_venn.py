@@ -100,7 +100,7 @@ def generate_petal_labels(datasets, fmt="{size}", outname="out", outdir="."):
         outname_final = "%s%02d%s.txt" % (
                   outname, names[name], name)
         names_out[logic] = outname_final
-        print(*datas[x], sep="\n", end="",
+        print(*sorted(datas[x]), sep="\n", end="",
               file=open(os.path.join(outdir, outname_final), "w"))
     # print(logic, petal_set)
     # print("----")
@@ -154,18 +154,19 @@ def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fon
         # dataset_labels = {r"Hyperlink: \url{http://google.com}"}
         # ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
         # print(dataset_labels, legend_loc)
-        for i, x, l, c in zip(range(len(dataset_labels)), dataset_labels, [len(x) for x in data.values()], colors):
+        for a, i, x, l, c in zip("ABCDEF", range(len(dataset_labels)), dataset_labels, [len(x) for x in data.values()], colors):
             annoloc1 = (0.96, 1-i*0.05)
             annoloc2 = (1, 1-i*0.05)
             # print(colors)
+            url_name = outname+"set.%s.%s.txt" % (a, x)
             ax.annotate("   ", xy=annoloc1,
                         xytext=annoloc1,
-                        url=outname+"set.%s.txt"%x, 
-                        bbox=dict(color=c, alpha=.4, url=outname+"set.%s.txt"%x))
-            ax.annotate("%s(%s)"%(x,l), xy=annoloc2,
+                        url=url_name,
+                        bbox=dict(color=c, alpha=.4, url=url_name))
+            ax.annotate("%s(%s)" % (x, l), xy=annoloc2,
                         xytext=annoloc2,
-                        url=outname+"set.%s.txt"%x, 
-                        bbox=dict(color="w", alpha=.4, url=outname+"set.%s.txt"%x))
+                        url=url_name,
+                        bbox=dict(color="w", alpha=.4, url=url_name))
     plt.savefig(f'{os.path.join(outdir, outname)}venn.pdf', dpi=200, bbox_inches='tight')
     plt.savefig(f'{os.path.join(outdir, outname)}venn.png', dpi=200, bbox_inches='tight')
     plt.savefig(f'{os.path.join(outdir, outname)}venn.svg', dpi=200, bbox_inches='tight')
@@ -219,18 +220,19 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsi
         # dataset_labels = {r"Hyperlink: \url{http://google.com}"}
         # ax.legend(dataset_labels, loc=legend_loc, prop={"size": fontsize})
         # print(dataset_labels, legend_loc)
-        for i, x, l, c in zip(range(len(dataset_labels)), dataset_labels, [len(x) for x in data.values()], colors):
+        for a, i, x, l, c in zip("ABCDEF", range(len(dataset_labels)), dataset_labels, [len(x) for x in data.values()], colors):
             annoloc1 = (0.9, 1-i*0.05)
             annoloc2 = (0.94, 1-i*0.05)
             # print(colors)
+            url_name = outname+"set.%s.%s.txt" % (a, x)
             ax.annotate("   ", xy=annoloc1,
                         xytext=annoloc1,
-                        url=outname+"set.%s.txt"%x, 
-                        bbox=dict(color=c, alpha=.4, url=outname+"set.%s.txt"%x))
-            ax.annotate("%s(%s)"%(x,l), xy=annoloc2,
+                        url=url_name,
+                        bbox=dict(color=c, alpha=.4, url=url_name))
+            ax.annotate("%s(%s)" % (x, l), xy=annoloc2,
                         xytext=annoloc2,
-                        url=outname+"set.%s.txt"%x, 
-                        bbox=dict(color="w", alpha=.4, url=outname+"set.%s.txt"%x))
+                        url=url_name,
+                        bbox=dict(color="w", alpha=.4, url=url_name))
     plt.savefig(f'{os.path.join(outdir, outname)}venn.pdf', dpi=200, bbox_inches='tight')
     plt.savefig(f'{os.path.join(outdir, outname)}venn.png', dpi=200, bbox_inches='tight')
     plt.savefig(f'{os.path.join(outdir, outname)}venn.svg', dpi=200, bbox_inches='tight')
@@ -261,8 +263,9 @@ def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", a
     petal_labels, names_out = generate_petal_labels(data.values(), fmt=fmt, outname=outname, outdir=outdir)
     # print("data:", data)
     # print(names_out)
-    for x in data:
-        print(*data[x], sep="\n", file=open(os.path.join(outdir, outname+"set.%s.txt"%x), "w"))
+    for a, x in zip("ABCDEF", data):
+        print(*sorted(data[x]), sep="\n", file=open(
+            os.path.join(outdir, outname+"set.%s.%s.txt" % (a, x)), "w"))
     return func(
         names_out=names_out, outname=outname, outdir=outdir,
         petal_labels=petal_labels, data=data,
