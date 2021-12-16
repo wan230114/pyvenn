@@ -170,6 +170,9 @@ def draw_venn(*, petal_labels, dataset_labels, hint_hidden, colors, figsize, fon
     plt.savefig(f'{os.path.join(outdir, outname)}venn.pdf', dpi=200, bbox_inches='tight')
     plt.savefig(f'{os.path.join(outdir, outname)}venn.png', dpi=200, bbox_inches='tight')
     plt.savefig(f'{os.path.join(outdir, outname)}venn.svg', dpi=200, bbox_inches='tight')
+    with open(f'{os.path.join(outdir, outname)}venn.html', "w") as fo_tmp:
+        fo_tmp.write(
+            '<embed src="'+f'{outname}venn.svg'+'" type="image/svg+xml" />')
     return ax, outname
 
 def update_hidden(hidden, logic, petal_labels):
@@ -236,6 +239,9 @@ def draw_pseudovenn6(*, petal_labels, dataset_labels, hint_hidden, colors, figsi
     plt.savefig(f'{os.path.join(outdir, outname)}venn.pdf', dpi=200, bbox_inches='tight')
     plt.savefig(f'{os.path.join(outdir, outname)}venn.png', dpi=200, bbox_inches='tight')
     plt.savefig(f'{os.path.join(outdir, outname)}venn.svg', dpi=200, bbox_inches='tight')
+    with open(f'{os.path.join(outdir, outname)}venn.html', "w") as fo_tmp:
+        fo_tmp.write(
+            '<embed src="'+f'{outname}venn.svg'+'" type="image/svg+xml" />')
     return ax, outname
 
 def is_valid_dataset_dict(data):
