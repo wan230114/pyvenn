@@ -261,9 +261,10 @@ def venn_dispatch(data, func, fmt="{size}", hint_hidden=False, cmap="viridis", a
         error_message = "To use fmt='{}', set hint_hidden=False".format(fmt)
         raise NotImplementedError(error_message)
     n_sets = len(data)
-    outname = '__vs__'.join(
-        map(lambda x: x[0]+"."+x[1], zip("ABCDEF", data.keys()))
-    ) + "___"
+    # outname = '__vs__'.join(
+    #     map(lambda x: x[0]+"."+x[1], zip("ABCDEF", data.keys()))
+    # ) + "___"
+    outname = "result_"
     petal_labels, names_out = generate_petal_labels(data.values(), fmt=fmt, outname=outname, outdir=outdir)
     # print("data:", data)
     # print(names_out)
